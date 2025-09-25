@@ -76,7 +76,7 @@ export default function SocialSignIn() {
             {/* <Image src="/RepoGPT.svg" alt="RepoGPT" width={35} height={35} /> */}
           </div>
           <CardTitle className="text-xl font-bold">
-            Welcome to RepoGPT
+            Welcome to TellGit
           </CardTitle>
           <CardDescription>Continue with your social account</CardDescription>
         </CardHeader>

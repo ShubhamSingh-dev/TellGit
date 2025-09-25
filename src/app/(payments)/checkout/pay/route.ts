@@ -21,8 +21,8 @@ export const GET = async (request: NextRequest) => {
   // Use the Checkout function to create a handler
   const checkoutHandler = Checkout({
     accessToken: process.env.POLAR_ACCESS_TOKEN,
-    successUrl: `https://repogpt.sohamgupta.me/dashboard`,
-    server: process.env.POLAR_SERVER as "production" | "sandbox"
+    successUrl: `https://localhost:3000/dashboard`,
+    server: process.env.POLAR_SERVER as "production" | "sandbox",
   });
 
   // Pass the request to the handler

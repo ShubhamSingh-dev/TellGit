@@ -19,47 +19,46 @@ export default async function RootLayout({
   }
 
   // Fetch the subscription data
-  const hasSubscription = await db.subscription.findFirst({
-    where: { userId: session.user.id },
-    select: { status: true, customerId: true },
-  });
+  // const hasSubscription = await db.subscription.findFirst({
+  //   where: { userId: session.user.id },
+  //   select: { status: true, customerId: true },
+  // });
 
-  // Create checkout URL
-  const encodedName = encodeURIComponent(session.user.name ?? "").replace(
-    /%20/g,
-    "+",
-  );
-  const encodedEmail = encodeURIComponent(session.user.email ?? "");
-  const checkoutUrl = `https://sandbox-api.polar.sh/v1/checkout-links/polar_cl_jIJgu0EBixLAkIsDljqGcx9fqYbLsjDX3Vhdz3DHc6l/redirect?customerName=${encodedName}&customerEmail=${encodedEmail}`;
-  
-  try {
+  // // Create checkout URL
+  // const encodedName = encodeURIComponent(session.user.name ?? "").replace(
+  //   /%20/g,
+  //   "+",
+  // );
+  // const encodedEmail = encodeURIComponent(session.user.email ?? "");
+  // const checkoutUrl = `https://sandbox-api.polar.sh/v1/checkout-links/polar_cl_jIJgu0EBixLAkIsDljqGcx9fqYbLsjDX3Vhdz3DHc6l/redirect?customerName=${encodedName}&customerEmail=${encodedEmail}`;
 
-    // Handle expired or past due subscriptions
-    if (
-      hasSubscription?.status === "EXPIRED" ||
-      hasSubscription?.status === "PAST_DUE"
-    ) {
-      redirect("/portal");
-    }
+  // try {
 
+  //   // Handle expired or past due subscriptions
+  //   if (
+  //     hasSubscription?.status === "EXPIRED" ||
+  //     hasSubscription?.status === "PAST_DUE"
+  //   ) {
+  //     redirect("/portal");
+  //   }
 
-    // If user has no customerId, redirect to checkout
-    if (hasSubscription?.customerId == null) {
-      redirect(checkoutUrl);
-    }
+  //   // If user has no customerId, redirect to checkout
+  //   if (hasSubscription?.customerId == null) {
+  //     redirect(checkoutUrl);
+  //   }
 
-    return (
-      <>
-        <SidebarWrapper>{children}</SidebarWrapper>
-        <Toaster richColors />
-      </>
-    );
-  } catch (error) {
-    if (hasSubscription?.customerId == null) {
-      redirect(checkoutUrl);
-    }
-    // Only redirect to signin for non-redirect errors
-    console.error("Error in protected layout:", error);
-    redirect("/signin");
-  }
+  //   return (
+  //     <>
+  //       <SidebarWrapper>{children}</SidebarWrapper>
+  //       <Toaster richColors />
+  //     </>
+  //   );
+  // } catch (error) {
+  //   if (hasSubscription?.customerId == null) {
+  //     redirect(checkoutUrl);
+  //   }
+  //   // Only redirect to signin for non-redirect errors
+  //   console.error("Error in protected layout:", error);
+  //   redirect("/signin");
+  // }
 }

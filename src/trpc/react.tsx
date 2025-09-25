@@ -57,7 +57,7 @@ export function TRPCReactProvider(props: { children: React.ReactNode }) {
           },
         }),
       ],
-    })
+    }),
   );
 
   return (
@@ -71,6 +71,7 @@ export function TRPCReactProvider(props: { children: React.ReactNode }) {
 
 function getBaseUrl() {
   if (typeof window !== "undefined") return window.location.origin;
-  if (process.env.BETTER_AUTH_URL) return `https://${process.env.BETTER_AUTH_URL}`;
+  if (process.env.BETTER_AUTH_URL)
+    return `https://${process.env.BETTER_AUTH_URL}`;
   return `http://localhost:${process.env.PORT ?? 3000}`;
 }
