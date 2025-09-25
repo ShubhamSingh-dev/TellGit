@@ -1,0 +1,319 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["postgresqlExtensions"]
+}
+
+datasource db {
+  provider   = "postgresql"
+  url        = env("DATABASE_URL")
+  directUrl  = env("DIRECT_URL")
+  extensions = [vector]
+}
+
+model User {
+  id            String   @id @default(cuid())
+  name          String
+  email         String
+  emailVerified Boolean
+  image         String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  credits       Int      @default(0)
+  customerId    String?  @unique
+
+  sessions       Session[]
+  accounts       Account[]
+  projects       UserToProject[]
+  questionsAsked Question[]
+  meeting        Meeting[]
+  subscription   Subscription[]
+  payment        Payment[]
+  creditHistory  CreditHistory[]
+
+  @@unique([email])
+  @@index([email, customerId])
+  @@map("user")
+}
+
+model Session {
+  id        String   @id
+  expiresAt DateTime
+  token     String
+  createdAt DateTime
+  updatedAt DateTime
+  ipAddress String?
+  userAgent String?
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([token])
+  @@map("session")
+}
+
+model Account {
+  id                    String    @id
+  accountId             String
+  providerId            String
+  userId                String
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime
+  updatedAt             DateTime
+
+  @@map("account")
+}
+
+model Verification {
+  id         String    @id
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime?
+  updatedAt  DateTime?
+
+  @@map("verification")
+}
+
+enum IndexingStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  ERROR
+}
+
+model Project {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  name           String
+  githubUrl      String
+  indexingStatus IndexingStatus @default(PENDING)
+
+  deletedAt DateTime?
+
+  users               UserToProject[]
+  commitLogs          CommitLogs[]
+  sourceCodeEmbedding SourceCodeEmbedding[]
+  savedQuestions      Question[]
+  meeting             Meeting[]
+  // creditUsage         CreditHistory[]
+}
+
+model UserToProject {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+
+  userId    String
+  projectId String
+  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+}
+
+model CommitLogs {
+  id        String    @id @default(uuid())
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @default(now())
+  deletedAt DateTime?
+
+  projectId String
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  commitHash         String
+  commitMessage      String
+  commitAuthorName   String
+  commitAuthorAvatar String
+  commitDate         DateTime
+  summary            String
+}
+
+model SourceCodeEmbedding {
+  id String @id @default(uuid())
+
+  summaryEmbedding Unsupported("vector(768)")?
+  sourceCode       String
+  fileName         String
+  summary          String
+
+  projectId String
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+}
+
+model Question {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+
+  question String
+  answer   String
+
+  fileReferences Json?
+
+  projectId String
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  // creditUsage CreditHistory[]
+}
+
+enum MeetingStatus {
+  PROCESSING
+  COMPLETED
+}
+
+model Meeting {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+
+  meetingUrl String
+  name       String
+  status     MeetingStatus @default(PROCESSING)
+  fileName   String
+  duration   Float? // Duration in seconds
+
+  projectId String
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  userId   String
+  user     User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  insights Insights[]
+  // creditUsage CreditHistory[]
+}
+
+model Insights {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+
+  start    String
+  end      String
+  gist     String
+  summary  String
+  headline String
+
+  meetingId String
+  meeting   Meeting @relation(fields: [meetingId], references: [id], onDelete: Cascade)
+}
+
+// Subscription plan types
+enum SubscriptionPlanType {
+  STARTER
+  PRO
+  ENTERPRISE
+}
+
+// Billing cycle types
+enum BillingCycle {
+  MONTHLY
+  ANNUAL
+}
+
+// Subscription status
+enum SubscriptionStatus {
+  ACTIVE
+  CANCELLED
+  EXPIRED
+  PAST_DUE
+}
+
+// Payment status
+enum PaymentStatus {
+  PENDING
+  SUCCESSFUL
+  FAILED
+  REFUNDED
+}
+
+// Credit transaction type
+enum CreditTransactionType {
+  PURCHASE
+  PLAN_ALLOCATION
+  PLAN_RESTRUCTURE
+  USAGE
+  REFUND
+  BONUS
+}
+
+model Subscription {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Subscription details
+  planType     SubscriptionPlanType
+  billingCycle BillingCycle
+  status       SubscriptionStatus   @default(EXPIRED)
+  customerId   String               @unique
+  polarSubId   String
+  startDate    DateTime
+  endDate      DateTime
+  autoRenew    Boolean              @default(true)
+
+  // Plan limits based on subscription type
+  maxProjects       Int
+  maxTeamMembers    Int
+  maxQuestions      Int
+  maxMeetingSeconds Int
+  includedCredits   Int
+
+  userId            String
+  user              User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  payments          Payment[]
+  creditAllocations CreditHistory[]
+}
+
+// Payment model for tracking all payment transactions
+model Payment {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Payment details
+  transactionId String
+  amount        Float
+  currency      String        @default("USD")
+  status        PaymentStatus
+  description   String
+  creditsAmount Int? // Number of credits purchased if applicable
+
+  // Payment gateway details
+  polarOrderId   String?
+  polarSignature String?
+
+  subscriptionId String?
+  subscription   Subscription? @relation(fields: [subscriptionId], references: [id])
+  customerId     String
+  user           User          @relation(fields: [customerId], references: [customerId], onDelete: Cascade)
+
+  creditAdditions CreditHistory[] // Credits added from this payment
+}
+
+// Model for tracking credit history (additions and usage)
+model CreditHistory {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+
+  // Transaction details
+  amount      Float
+  type        CreditTransactionType
+  description String
+
+  customerId String
+  user       User   @relation(fields: [customerId], references: [customerId], onDelete: Cascade)
+
+  paymentId      String?
+  payment        Payment?      @relation(fields: [paymentId], references: [id])
+  subscriptionId String?
+  subscription   Subscription? @relation(fields: [subscriptionId], references: [id])
+}
