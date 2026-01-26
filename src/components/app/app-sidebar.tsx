@@ -132,7 +132,7 @@ export const AppSidebar = () => {
               const isActive = project.id === projectId;
               const projectColorClass = getProjectColor(
                 project.id ?? project.name,
-              ) || "bg-indigo-500";
+              ) ?? "bg-indigo-500";
               const activeBorderClass = projectColorClass.replace(
                 "bg-",
                 "border-",
