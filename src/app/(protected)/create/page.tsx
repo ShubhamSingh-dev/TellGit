@@ -1,83 +1,140 @@
 "use client";
+
 import React from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import Image from "next/image";
+
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
-import useRefetch from "~/hooks/use-refetch";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "~/components/ui/form";
 import { api } from "~/trpc/react";
 
-type FormInput = {
-  repoUrl: string;
-  projectName: string;
-  githubToken?: string;
-};
+const createProjectSchema = z.object({
+  name: z.string().min(1, "Project name is required"),
+  repoUrl: z.string().url("Must be a valid URL"),
+  githubToken: z.string().optional(),
+});
+
+type FormInput = z.infer<typeof createProjectSchema>;
 
 const CreatePage = () => {
-  const refetch = useRefetch();
-  const { register, handleSubmit, reset } = useForm<FormInput>();
+  const utils = api.useUtils();
+  const form = useForm<FormInput>({
+    resolver: zodResolver(createProjectSchema),
+    defaultValues: {
+      name: "",
+      repoUrl: "",
+      githubToken: "",
+    },
+  });
+
   const createProject = api.project.createProject.useMutation();
 
   const onSubmit = (data: FormInput) => {
-    createProject.mutate({
-      name: data.projectName,
-      repoUrl: data.repoUrl,
-      githubToken: data.githubToken,
-    },{
-      onSuccess: () => {
-        toast.success("Project created successfully!");
-        refetch();
-        reset();
+    createProject.mutate(
+      {
+        name: data.name,
+        repoUrl: data.repoUrl,
+        githubToken: data.githubToken,
       },
-      onError: (error) => {
-        toast.error("Failed to create project: " + error.message);
+      {
+        onSuccess: () => {
+          toast.success("Project created successfully!");
+          void utils.project.getProjects.invalidate();
+          form.reset();
+        },
+        onError: (error) => {
+          toast.error("Failed to create project: " + error.message);
+        },
       }
-    });
-    return true;
+    );
   };
 
   return (
-    <>
-      <div className="flex h-full items-center justify-center gap-12">
-        <img src="./undraw_programming.svg" alt="undraw_programming" className="h-56 w-auto" />
-        <div>
-          <div>
-            <h1 className="text-2xl font-semibold">
-              Link your GitHub repository
-            </h1>
-            <p className="text-muted-foreground text-sm">
-              Enter the URL of your GitHub repository to get started.
-            </p>
-          </div>
-          <div className="h4"></div>
-          <div>
-            <form onSubmit={handleSubmit(onSubmit)}>
-              <Input
-                required
-                {...register("projectName", { required: true })}
-                placeholder="Project Name"
-              />
-              <Input
-                required
-                {...register("repoUrl", { required: true })}
-                placeholder="Repository URL"
-                type="url"
-              />
-              <div className="h-2"></div>
-              <Input
-                type="password"
-                {...register("githubToken")}
-                placeholder="GitHub Personal Access Token (optional)"
-              />
-              <div className="h-4"></div>
-              <Button type="submit" disabled={createProject.isPending}>
-                Link Repository
-              </Button>
-            </form>
-          </div>
+    <div className="flex h-full items-center justify-center gap-12">
+      <Image
+        src="/undraw_programming.svg"
+        alt="undraw_programming"
+        width={300}
+        height={300}
+        className="h-56 w-auto"
+        priority
+      />
+      <div className="max-w-md w-full">
+        <div className="mb-8">
+          <h1 className="text-2xl font-semibold">
+            Link your GitHub repository
+          </h1>
+          <p className="text-muted-foreground text-sm">
+            Enter the URL of your GitHub repository to get started.
+          </p>
         </div>
+
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            <FormField
+              control={form.control}
+              name="name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Project Name</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Project Name" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="repoUrl"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Repository URL</FormLabel>
+                  <FormControl>
+                    <Input type="url" placeholder="Repository URL" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="githubToken"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>GitHub Token (Optional)</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="password"
+                      placeholder="GitHub Personal Access Token"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <Button type="submit" className="w-full" disabled={createProject.isPending}>
+              {createProject.isPending ? "Linking..." : "Link Repository"}
+            </Button>
+          </form>
+        </Form>
       </div>
-    </>
+    </div>
   );
 };
 

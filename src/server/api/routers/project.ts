@@ -18,7 +18,7 @@ export const projectRouter = createTRPCRouter({
           githubToken: input.githubToken,
           userToProjects: {
             create: {
-              userId: ctx.session.user.id!,
+              userId: ctx.session.user.id,
             },
           },
         },
@@ -30,7 +30,7 @@ export const projectRouter = createTRPCRouter({
         where: {
           userToProjects: {
             some: {
-              userId: ctx.session.user.id!,
+              userId: ctx.session.user.id,
             },
           },
           deletedAt: null
