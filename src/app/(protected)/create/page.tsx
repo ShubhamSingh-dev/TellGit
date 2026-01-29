@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -18,6 +19,7 @@ import {
   FormMessage,
 } from "~/components/ui/form";
 import { api } from "~/trpc/react";
+import useProject from "~/hooks/use-project";
 
 const createProjectSchema = z.object({
   name: z.string().min(1, "Project name is required"),
@@ -28,6 +30,8 @@ const createProjectSchema = z.object({
 type FormInput = z.infer<typeof createProjectSchema>;
 
 const CreatePage = () => {
+  const router = useRouter();
+  const { setProjectId } = useProject();
   const utils = api.useUtils();
   const form = useForm<FormInput>({
     resolver: zodResolver(createProjectSchema),
@@ -39,40 +43,14 @@ const CreatePage = () => {
   });
 
   const createProject = api.project.createProject.useMutation({
-    onMutate: async (newProjectData) => {
-      // Cancel ongoing refetches
-      await utils.project.getProjects.cancel();
-
-      // Get current data
-      const previousProjects = utils.project.getProjects.getData();
-
-      // Optimistically update with a temporary project
-      utils.project.getProjects.setData(undefined, (old) => [
-        ...(old ?? []),
-        {
-          id: `temp-${Date.now()}`,
-          ...newProjectData,
-          createdAt: new Date(),
-          updatedAt: new Date(),
-          deletedAt: null,
-        } as any,
-      ]);
-
-      return { previousProjects };
-    },
-    onSuccess: (newProject) => {
-      // Replace temp project with real one from server
-      utils.project.getProjects.setData(undefined, (old) =>
-        old?.map((p) => (p.id.startsWith("temp-") ? newProject : p)),
-      );
+    onSuccess: (project) => {
       toast.success("Project created successfully!");
+      setProjectId(project.id);
       form.reset();
+      router.push("/dashboard");
+      void utils.project.getProjects.refetch();
     },
-    onError: (error, variables, context) => {
-      // Rollback on error
-      if (context?.previousProjects) {
-        utils.project.getProjects.setData(undefined, context.previousProjects);
-      }
+    onError: (error) => {
       toast.error("Failed to create project: " + error.message);
     },
   });

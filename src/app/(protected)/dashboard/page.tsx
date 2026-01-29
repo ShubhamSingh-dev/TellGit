@@ -23,6 +23,7 @@ export default function DashboardPage() {
   
   return (
     <div className="flex-1 overflow-y-auto bg-charcoal-950 p-8">
+      {project?.id}
       {/* Header Section */}
       <div className="max-w-6xl mx-auto space-y-8">
         <div className="flex items-center bg-brand-primary/10 border rounded-sm border-brand-primary/30 justify-between p-4">
