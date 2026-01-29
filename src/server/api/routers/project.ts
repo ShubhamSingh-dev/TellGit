@@ -25,18 +25,18 @@ export const projectRouter = createTRPCRouter({
       });
       return project;
     }),
-    getProjects : protectedProcedure.query(async ({ctx}) => {
-      const projects = await ctx.db.project.findMany({
-        where: {
-          userToProjects: {
-            some: {
-              userId: ctx.session.user.id,
-            },
+  getProjects: protectedProcedure.query(async ({ ctx }) => {
+    const projects = await ctx.db.project.findMany({
+      where: {
+        userToProjects: {
+          some: {
+            userId: ctx.session.user.id,
           },
-          deletedAt: null
         },
-      });
-      
-      return projects;
-    })
+        deletedAt: null
+      },
+    });
+    
+    return projects;
+  }),
 });

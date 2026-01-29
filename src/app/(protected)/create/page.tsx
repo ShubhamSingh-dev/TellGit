@@ -21,7 +21,7 @@ import { api } from "~/trpc/react";
 
 const createProjectSchema = z.object({
   name: z.string().min(1, "Project name is required"),
-  repoUrl: z.string().url("Must be a valid URL"),
+  repoUrl: z.url("Must be a valid URL"),
   githubToken: z.string().optional(),
 });
 
@@ -38,26 +38,51 @@ const CreatePage = () => {
     },
   });
 
-  const createProject = api.project.createProject.useMutation();
+  const createProject = api.project.createProject.useMutation({
+    onMutate: async (newProjectData) => {
+      // Cancel ongoing refetches
+      await utils.project.getProjects.cancel();
+
+      // Get current data
+      const previousProjects = utils.project.getProjects.getData();
+
+      // Optimistically update with a temporary project
+      utils.project.getProjects.setData(undefined, (old) => [
+        ...(old ?? []),
+        {
+          id: `temp-${Date.now()}`,
+          ...newProjectData,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          deletedAt: null,
+        } as any,
+      ]);
+
+      return { previousProjects };
+    },
+    onSuccess: (newProject) => {
+      // Replace temp project with real one from server
+      utils.project.getProjects.setData(undefined, (old) =>
+        old?.map((p) => (p.id.startsWith("temp-") ? newProject : p)),
+      );
+      toast.success("Project created successfully!");
+      form.reset();
+    },
+    onError: (error, variables, context) => {
+      // Rollback on error
+      if (context?.previousProjects) {
+        utils.project.getProjects.setData(undefined, context.previousProjects);
+      }
+      toast.error("Failed to create project: " + error.message);
+    },
+  });
 
   const onSubmit = (data: FormInput) => {
-    createProject.mutate(
-      {
-        name: data.name,
-        repoUrl: data.repoUrl,
-        githubToken: data.githubToken,
-      },
-      {
-        onSuccess: () => {
-          toast.success("Project created successfully!");
-          void utils.project.getProjects.invalidate();
-          form.reset();
-        },
-        onError: (error) => {
-          toast.error("Failed to create project: " + error.message);
-        },
-      }
-    );
+    createProject.mutate({
+      name: data.name,
+      repoUrl: data.repoUrl,
+      githubToken: data.githubToken,
+    });
   };
 
   return (
@@ -70,7 +95,7 @@ const CreatePage = () => {
         className="h-56 w-auto"
         priority
       />
-      <div className="max-w-md w-full">
+      <div className="w-full max-w-md">
         <div className="mb-8">
           <h1 className="text-2xl font-semibold">
             Link your GitHub repository
@@ -128,7 +153,11 @@ const CreatePage = () => {
               )}
             />
 
-            <Button type="submit" className="w-full" disabled={createProject.isPending}>
+            <Button
+              type="submit"
+              className="w-full"
+              disabled={createProject.isPending}
+            >
               {createProject.isPending ? "Linking..." : "Link Repository"}
             </Button>
           </form>

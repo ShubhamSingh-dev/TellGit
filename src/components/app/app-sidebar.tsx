@@ -52,7 +52,7 @@ const mainMenu = [
 export const AppSidebar = () => {
   const pathname = usePathname();
   const router = useRouter();
-  const { projects, projectId } = useProject();
+  const { projects, projectId, setProjectId } = useProject();
 
   const { open } = useSidebar();
   const { data: session } = authClient.useSession();
@@ -130,9 +130,8 @@ export const AppSidebar = () => {
           <SidebarMenu className="space-y-1">
             {projects?.map((project) => {
               const isActive = project.id === projectId;
-              const projectColorClass = getProjectColor(
-                project.id ?? project.name,
-              ) ?? "bg-indigo-500";
+              const projectColorClass =
+                getProjectColor(project.id ?? project.name) ?? "bg-indigo-500";
               const activeBorderClass = projectColorClass.replace(
                 "bg-",
                 "border-",
@@ -144,10 +143,10 @@ export const AppSidebar = () => {
                     asChild
                     className="p-0 hover:bg-transparent hover:text-inherit"
                   >
-                    <Link
-                      href="#"
+                    <div
+                      onClick={() => setProjectId(project.id)}
                       className={cn(
-                        "flex w-full items-center space-x-3 px-3 py-2",
+                        "flex w-full cursor-pointer items-center space-x-3 px-3 py-2",
                         isActive
                           ? cn(
                               "bg-charcoal-800 border-l-4 text-white rounded-none",
@@ -165,7 +164,7 @@ export const AppSidebar = () => {
                       <span className="font-mono text-sm font-medium">
                         {project.name}
                       </span>
-                    </Link>
+                    </div>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               );
