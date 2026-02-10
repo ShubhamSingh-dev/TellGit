@@ -4,107 +4,119 @@ import axios from "axios";
 import { aiSummariseCommit } from "./gemini";
 
 export const octokit = new Octokit({
-    auth: process.env.GITHUB_TOKEN,
+  auth: process.env.GITHUB_TOKEN,
 });
 
-
-const githubUrl = "https://github.com/ShubhamSingh-dev/zustand"
-
 type Response = {
-    commitHash: string;
-    commitMessage: string;
-    commitAuthorName: string;
-    commitAuthorAvatar: string;
-    commitDate: string;
-}
+  commitHash: string;
+  commitMessage: string;
+  commitAuthorName: string;
+  commitAuthorAvatar: string;
+  commitDate: string;
+};
 
-export const getCommitHashes = async (githubUrl: string): Promise<Response[]> => {
-    const [owner, repo] = githubUrl.split("/").slice(-2)
-    if(!owner || !repo) throw new Error("Invalid github url")
+export const getCommitHashes = async (
+  githubUrl: string,
+): Promise<Response[]> => {
+  const [owner , repo] = githubUrl.split("/").slice(-2);
+  if(!owner || !repo) {
+    throw new Error("Invalid github url");
+  }
+  const { data } = await octokit.rest.repos.listCommits({
+    owner,
+    repo,
+  });
 
-   const {data} = await octokit.rest.repos.listCommits({
-    owner: owner,
-    repo: repo,
-   })
+  const sortedCommits = data.sort((a: any, b: any) => {
+    const dateA = new Date(a.commit.committer.date);
+    const dateB = new Date(b.commit.committer.date);
+    return dateB.getTime() - dateA.getTime();
+  });
 
-   const sortedCommit = data.sort((a : any, b : any) => new Date(b.commit.author.date).getTime() - new Date(a.commit.author.date).getTime())
-
-   return sortedCommit.slice(0 , 15).map((commit : any) => ({
-    commitHash: commit.sha as string,
-    commitMessage: commit.commit.message ?? "",
-    commitAuthorName: commit.commit?.author?.name ?? "",
-    commitAuthorAvatar: commit.author?.avatar_url ?? "",
-    commitDate: commit.commit?.author?.date ?? "",
-   }))
-}
+  return sortedCommits.slice(0, 10).map((commit: any) => {
+    return {
+      commitHash: commit.sha as string,
+      commitMessage: commit.commit.message ?? "",
+      commitAuthorName: commit.commit?.author?.name ?? "",
+      commitAuthorAvatar: commit?.commit?.author?.avatar_url ?? "",
+      commitDate: commit.commit?.author?.date ?? "",
+    };
+  });
+};
 
 export const pollCommits = async (projectId: string) => {
-    const {project, githubUrl} = await fetchProjectGithubUrl(projectId)
+  const { project, githubUrl } = await fetchProjectGithubUrl(projectId);
+  const commitHashes = await getCommitHashes(githubUrl);
+  const unprocessedCommits = await filterUnprocessedCommits(
+    commitHashes,
+    projectId,
+  );
 
-    if(!githubUrl) throw new Error("Project not found or git url not found");
-    const commitHashes = await getCommitHashes(githubUrl)
-  
-    const unprocessedCommits = await filterprocessedCommits(commitHashes, projectId)
-    const summaryResponse = await Promise.allSettled(
-        unprocessedCommits.map((commit) => {
-            return summariseCommit(githubUrl, commit.commitHash)
-        })
-    )
-    const summaries = summaryResponse.map((response) => {
-        if(response.status === "fulfilled"){
-            return response.value as string
-        }
-        return ""
-    })
-    const commit = await db.commit.createMany({
-        data: summaries.map((summary, index) => {
-            console.log(`processing commits: ${index}`)
-            return {
-                projectId,
-                commitHash: unprocessedCommits[index]!.commitHash,
-                commitMessage: unprocessedCommits[index]!.commitMessage,
-                commitAuthorName: unprocessedCommits[index]!.commitAuthorName,
-                commitAuthorAvatar: unprocessedCommits[index]!.commitAuthorAvatar,
-                commitDate: unprocessedCommits[index]!.commitDate,
-                summary: summary,
-            }
-        })
-    })
+  const summaryResponses = await Promise.allSettled(unprocessedCommits.map( commit => {
+    return summariseCommit(githubUrl, commit.commitHash);
+  }))
+  const summaries = summaryResponses.map((response) => {
+    if (response.status === "fulfilled") {
+      return response.value;
+    }
+    return "No summary generated";
+  });
 
-    return commit
-}
-
-async function summariseCommit(githubUrl : string, commitHash : string){
-    const { data } = await axios.get(`${githubUrl}/commit/${commitHash}.diff` , {
-        headers:{
-            Accept : "application/vnd.github.v3+json",
-        }
+  const commits = await db.commit.createMany({
+    data: summaries.map((summary, index) => {
+      console.log(`processing commits ${index}`)
+      return {
+        projectId,
+        commitHash: unprocessedCommits[index]!.commitHash,
+        commitMessage: unprocessedCommits[index]!.commitMessage,
+        commitAuthorName: unprocessedCommits[index]!.commitAuthorName,
+        commitAuthorAvatar: unprocessedCommits[index]!.commitAuthorAvatar,
+        commitDate: unprocessedCommits[index]!.commitDate,
+        summary,
+      };
     })
-    return await aiSummariseCommit(data) || ""
+  })
+
+  return commits;
+};
+
+async function summariseCommit(githubUrl:string , commitHash : string) {
+  const { data } = await axios.get(`${githubUrl}/commits/${commitHash}.diff` , {
+    headers:{
+      Accept: "application/vnd.github.v3.diff"
+    }
+  });
+
+  const summary = await aiSummariseCommit(data) || "No summary generated";
+  return summary
 }
 
 async function fetchProjectGithubUrl(projectId: string) {
-    const project = await db.project.findUnique({
-        where: {
-            id: projectId,
-        },
-        select: {
-            repoUrl: true,
-        }
-    })
-    return {project , githubUrl: project?.repoUrl}
+  const project = await db.project.findUnique({
+    where: { id: projectId },
+    select: { repoUrl: true },
+  });
+
+  if (!project?.repoUrl) {
+    throw new Error("Project has no github url");
+  }
+  return { project, githubUrl: project?.repoUrl };
 }
 
-async function filterprocessedCommits(commitHashes:Response[], projectId:string) {
-    const processedCommits = await db.commit.findMany({
-        where: { projectId }
-    })
+async function filterUnprocessedCommits(
+  commitHashes: Response[],
+  projectId: string,
+) {
+  const processedCommits = await db.commit.findMany({
+    where: { projectId },
+  });
 
-    const unprocessedCommits = commitHashes.filter((commit) => {
-        return !processedCommits.some((processedCommit) => processedCommit.commitHash === commit.commitHash)
-    })
+  const unprocessedCommits = commitHashes.filter(
+    (commit) =>
+      !processedCommits.some(
+        (processedCommit) => processedCommit.commitHash === commit.commitHash,
+      ),
+  );
 
-    return unprocessedCommits
+  return unprocessedCommits;
 }
-
-pollCommits("cmkzny2oi0000i4lo1vz5uznm")

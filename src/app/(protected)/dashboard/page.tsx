@@ -113,6 +113,10 @@ export default function DashboardPage() {
               <p className="text-[9px] text-brand-primary font-bold tracking-[0.2em] uppercase">Enterprise Layer</p>
             </div>
           </section>
+
+          <section className="">
+            Commitlog
+          </section>
         </div>
       </div>
     </div>
