@@ -38,7 +38,7 @@ export const getCommitHashes = async (
       commitHash: commit.sha as string,
       commitMessage: commit.commit.message ?? "",
       commitAuthorName: commit.commit?.author?.name ?? "",
-      commitAuthorAvatar: commit?.commit?.author?.avatar_url ?? "",
+      commitAuthorAvatar: commit?.author?.avatar_url ?? "",
       commitDate: commit.commit?.author?.date ?? "",
     };
   });
@@ -81,14 +81,18 @@ export const pollCommits = async (projectId: string) => {
 };
 
 async function summariseCommit(githubUrl:string , commitHash : string) {
-  const { data } = await axios.get(`${githubUrl}/commits/${commitHash}.diff` , {
+  const diffUrl = `${githubUrl}/commit/${commitHash}.diff`;
+  console.log("Fetching diff from:", diffUrl);
+
+  //currently only work on public repos
+  const { data } = await axios.get(diffUrl, {
     headers:{
       Accept: "application/vnd.github.v3.diff"
     }
   });
 
   const summary = await aiSummariseCommit(data) || "No summary generated";
-  return summary
+  return summary;
 }
 
 async function fetchProjectGithubUrl(projectId: string) {
