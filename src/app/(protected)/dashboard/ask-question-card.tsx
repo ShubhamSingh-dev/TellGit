@@ -3,8 +3,6 @@
 import MDEditor from "@uiw/react-md-editor";
 import Image from "next/image";
 import React, { useState } from "react";
-// import { readStreamableValue } from "ai/rsc";
-// import CodeReferences from "./code-references";
 import { toast } from "sonner";
 import { Code, Paperclip, SaveIcon, Sparkles, Terminal } from "lucide-react";
 import useProject from "~/hooks/use-project";
@@ -59,57 +57,91 @@ const AskQuestionCard = () => {
     <>
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent
-          className="w-[80vw] sm:max-w-[90vw] h-[90vh]"
+          className="sm:max-w-[80vw] w-[95vw] h-[90vh] bg-charcoal-950 border-charcoal-800 rounded-sm flex flex-col p-0 overflow-hidden"
           onInteractOutside={(e) => e.preventDefault()}
         >
-          <DialogHeader>
-            <div className="flex items-center gap-2">
-              <DialogTitle>
-                <div className="bg-brand-primary flex h-10 w-10 items-center justify-center rounded-sm">
-                  <Sparkles className="size-6 text-xl text-white" />
+          <DialogHeader className="p-6 border-b border-charcoal-800 bg-charcoal-900/50">
+            <div className="flex items-center justify-between gap-4">
+              <div className="flex items-center gap-3">
+                <div className="bg-brand-primary/10 flex h-10 w-10 items-center justify-center rounded-sm border border-brand-primary/20">
+                  <Sparkles className="size-5 text-brand-primary" />
                 </div>
-              </DialogTitle>
-              <Button
-              disabled={saveAnswer.isPending}
-                variant="outline"
-                size="sm"
-                onClick={() => {
-                  saveAnswer.mutate(
-                    {
-                      projectId: project!.id,
-                      question,
-                      answer,
-                      fileReferences: filesReferences,
-                    },
-                    {
-                      onSuccess: () => {
-                        toast.success("Answer saved successfully!");
+                <div>
+                  <DialogTitle className="text-white text-lg font-bold tracking-tight uppercase italic">
+                    AI Analysis Result
+                  </DialogTitle>
+                  <p className="text-[10px] font-bold tracking-wider text-slate-500 uppercase">
+                    Query execution complete
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <Button
+                  disabled={saveAnswer.isPending}
+                  variant="outline"
+                  size="sm"
+                  className="bg-charcoal-900 border-charcoal-800 text-white hover:bg-charcoal-800 rounded-sm px-4 h-9 text-[10px] font-bold tracking-widest uppercase transition-all"
+                  onClick={() => {
+                    saveAnswer.mutate(
+                      {
+                        projectId: project!.id,
+                        question,
+                        answer,
+                        fileReferences: filesReferences,
                       },
-                      onError: () => {
-                        toast.error("Failed to save the answer.");
+                      {
+                        onSuccess: () => {
+                          toast.success("Answer saved successfully!");
+                        },
+                        onError: () => {
+                          toast.error("Failed to save the answer.");
+                        },
                       },
-                    },
-                  );
-                }}
-              >
-                Save Answer
-              </Button>
+                    );
+                  }}
+                >
+                  <SaveIcon className="mr-2 size-3" />
+                  Save Analysis
+                </Button>
+              </div>
             </div>
           </DialogHeader>
-          <MDEditor.Markdown
-            source={answer}
-            className="h-auto! max-h-[70vh] w-full overflow-auto"
-          />
-          <div className="h-4"></div>
-          <CodeReferences fileReferences={filesReferences} />
-          <Button
-            type="button"
-            onClick={() => {
-              setOpen(false);
-            }}
-          >
-            Close
-          </Button>
+
+          <div className="flex-1 overflow-y-auto p-6 space-y-8 custom-scrollbar">
+            <section className="space-y-4">
+              <h3 className="text-[10px] font-bold tracking-widest text-brand-primary uppercase">
+                Detailed Answer
+              </h3>
+              <div className="prose prose-invert max-w-none">
+                <MDEditor.Markdown
+                  source={answer}
+                  className="bg-transparent! text-slate-300! font-sans text-sm leading-relaxed"
+                />
+              </div>
+            </section>
+
+            <section className="space-y-4">
+              <div className="flex items-center gap-2">
+                <Code className="size-4 text-brand-primary" />
+                <h3 className="text-[10px] font-bold tracking-widest text-brand-primary uppercase">
+                  Source Code References
+                </h3>
+              </div>
+              <CodeReferences fileReferences={filesReferences} />
+            </section>
+          </div>
+
+          <div className="p-4 border-t border-charcoal-800 bg-charcoal-900/50 flex justify-end">
+            <Button
+              type="button"
+              className="bg-brand-primary hover:bg-brand-primary/80 rounded-sm px-6 text-[10px] font-bold tracking-widest uppercase text-white transition-all h-9"
+              onClick={() => {
+                setOpen(false);
+              }}
+            >
+              Close Terminal
+            </Button>
+          </div>
         </DialogContent>
       </Dialog>
 

@@ -3,7 +3,7 @@
 import React from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
-import { lucario } from "react-syntax-highlighter/dist/esm/styles/prism";
+import { oneDark } from "react-syntax-highlighter/dist/esm/styles/prism";
 import { cn } from "~/lib/utils";
 
 type CodeReferencesProps = {
@@ -16,17 +16,18 @@ const CodeReferences = ({ fileReferences }: CodeReferencesProps) => {
   }
 
   return (
-    <div className="max-w-[70vw]">
+    <div className="w-full">
       <Tabs value={tab} onValueChange={setTab}>
-        <div className="flex gap-2 overflow-scroll rounded-md bg-gray-200 p-1">
+        <div className="flex gap-2 overflow-x-auto rounded-sm bg-charcoal-900 p-1 border border-charcoal-800 mb-4 no-scrollbar">
           {fileReferences.map((file) => (
             <button
               onClick={() => setTab(file.fileName)}
               key={file.fileName}
               className={cn(
-                "text-muted-foreground hover:bg-muted rounded-md px-3 py-1.5 text-sm font-medium whitespace-nowrap transition-colors",
+                "hover:bg-charcoal-800/50 rounded-sm px-3 py-1.5 text-xs font-bold tracking-wider uppercase whitespace-nowrap transition-all border border-transparent",
                 {
-                  "bg-primary text-primary-foreground": tab === file.fileName,
+                  "bg-brand-primary/10 text-brand-primary border-brand-primary/20": tab === file.fileName,
+                  "text-slate-500": tab !== file.fileName,
                 },
               )}
             >
@@ -38,12 +39,17 @@ const CodeReferences = ({ fileReferences }: CodeReferencesProps) => {
           <TabsContent
             key={file.fileName}
             value={file.fileName}
-            className="max-h-[40vh] max-w-7xl overflow-scroll rounded-md"
+            className="max-h-[50vh] w-full overflow-auto rounded-sm border border-charcoal-800 bg-charcoal-950/50"
           >
             <SyntaxHighlighter
               language="typescript"
-              style={lucario}
-              className="rounded-md"
+              style={oneDark}
+              customStyle={{
+                margin: 0,
+                padding: '1.25rem',
+                background: 'transparent',
+                fontSize: '0.8rem',
+              }}
             >
               {file.sourceCode}
             </SyntaxHighlighter>
