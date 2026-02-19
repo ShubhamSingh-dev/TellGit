@@ -1,6 +1,6 @@
 import { GithubRepoLoader } from "@langchain/community/document_loaders/web/github";
 import { Document } from "@langchain/core/documents";
-import { generateSummaryEmbedding, summariseCode } from "./gemini";
+import { generateEmbedding, summariseCode } from "./gemini";
 import { db } from "~/server/db";
 
 export const loadGithubRepo = async (
@@ -33,35 +33,60 @@ export const indexGithubRepo = async (
 ) => {
   const docs = await loadGithubRepo(githubUrl, githubToken);
   const allEmbeddings = await generateEmbeddings(docs);
-  await Promise.allSettled(
+  const results = await Promise.allSettled(
     allEmbeddings.map(async (embedding, index) => {
-      console.log(`processing ${index} of ${allEmbeddings.length}`);
-      if (!embedding) return;
+      console.log(`processing ${index + 1} of ${allEmbeddings.length}`);
+      if (!embedding) {
+        console.log(`Skipping index ${index} - no embedding data`);
+        return;
+      }
 
-      const sourceCodeEmbedding = await db.sourceCodeEmbedding.create({
-        data: {
-          summary: embedding.summary,
-          sourceCode: embedding.sourceCode,
-          fileName: embedding.fileName,
-          projectId,
-        },
-      });
+      try {
+        const sourceCodeEmbedding = await db.sourceCodeEmbedding.create({
+          data: {
+            summary: embedding.summary!,
+            sourceCode: embedding.sourceCode,
+            fileName: embedding.fileName,
+            projectId,
+          },
+        });
+        
+        console.log(`Created record ${sourceCodeEmbedding.id}, updating embedding...`);
 
-      //explicity update the embedding as a vector
-      await db.$executeRaw`
-      UPDATE "SourceCodeEmbedding" 
-      SET "summaryEmbedding" = ${embedding.embedding}::vector 
-      WHERE "id" = ${sourceCodeEmbedding.id}
-    `;
+        // Convert embedding array to PostgreSQL vector format
+        const embeddingString = `[${embedding.embedding?.join(',')}]`;
+
+        await db.$executeRaw`
+        UPDATE "SourceCodeEmbedding" 
+        SET "summaryEmbedding" = ${embeddingString}::vector 
+        WHERE "id" = ${sourceCodeEmbedding.id}
+      `;
+        
+        console.log(`✓ Successfully stored embedding for ${embedding.fileName}`);
+      } catch (error) {
+        console.error(`❌ Failed to store embedding for ${embedding.fileName}:`, error);
+        throw error;
+      }
     }),
   );
+  
+  // Log summary of results
+  const successful = results.filter(r => r.status === 'fulfilled').length;
+  const failed = results.filter(r => r.status === 'rejected').length;
+  console.log(`\n📊 Embedding storage complete: ${successful} successful, ${failed} failed\n`);
 };
 
 const generateEmbeddings = async (docs: Document[]) => {
   return await Promise.all(
     docs.map(async (doc) => {
       const summary = await summariseCode(doc);
-      const embedding = await generateSummaryEmbedding(summary);
+      // Skip if summary is empty or failed
+      if (!summary || summary.trim() === "") {
+        console.log(`Skipping ${doc.metadata.source} - no summary generated`);
+        return null;
+      }
+      
+      const embedding = await generateEmbedding(summary);
       return {
         summary,
         embedding,

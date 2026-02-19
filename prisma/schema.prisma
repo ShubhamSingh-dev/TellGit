@@ -43,6 +43,7 @@ model User {
   posts    Post[]
 
   userToProjects UserToProject[]
+  questionsAsked  Question[]
 
   @@unique([email])
   @@map("user")
@@ -107,6 +108,7 @@ model Project {
   userToProjects UserToProject[]
   commits        Commit[]
   sourceCodeEmbeddings  SourceCodeEmbedding[]
+  savedQuestions    Question[]
 }
 
 model UserToProject {
@@ -151,4 +153,21 @@ model Commit {
 
   //ai summary
   summary String
+}
+
+model Question {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  question  String
+  answer    String
+
+  fileReferences Json?
+
+  projectId   String
+  project   Project   @relation(fields: [projectId],references: [id])
+
+  userId  String
+  user  User  @relation(fields: [userId], references: [id])
 }

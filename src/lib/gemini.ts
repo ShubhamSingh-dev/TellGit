@@ -1,18 +1,16 @@
 // npx tsx src/lib/gemini.ts
-
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import { GoogleGenAI } from "@google/genai";
 import "dotenv/config";
 import { Document } from "@langchain/core/documents";
 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
-const model = genAI.getGenerativeModel({
-  model: "gemini-2.5-flash",
-});
+const genAI = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY! });
 
 export const aiSummariseCommit = async (diff: string) => {
   // https://github.com/owner/repo/commit/<commitHash>.diff
-  const response = await model.generateContent([
-    `Your are an expert programmer, and you are trying to summarize a git file.
+  const response = await genAI.models.generateContent({
+    model: "gemini-2.5-flash",
+    contents: [
+      `Your are an expert programmer, and you are trying to summarize a git file.
         Reminders about the git diff format:
         For every file, there are a few metadata lines, like (for example):
         \`\`\`
@@ -40,41 +38,49 @@ export const aiSummariseCommit = async (diff: string) => {
         The last comment does not include the file names, because there were more than two relevant files in the hypothetical commit.
         Do not include parts of the example in your summary.
         It is given only as an example of appropirate comments.`,
-    `Please summarise the following diff file: \n\n${diff}`,
-  ]);
-  return response.response.text();
+      `Please summarise the following diff file: \n\n${diff}`,
+    ],
+  });
+  return response.text;
 };
 
 export async function summariseCode(doc: Document) {
   console.log("getting summary for ", doc.metadata.source);
   try {
     const code = doc.pageContent.slice(0, 10000); // Limit t 10000 characters
-    const response = await model.generateContent([
-      `You are an intelligent senior software engineer who specialises in onboarding junior software engineers onto projects`,
-      `You are onboarding a junior software engineer and explaining to them the purpose of the ${doc.metadata.source} file
+    const response = await genAI.models.generateContent({
+      model: "gemini-2.5-flash",
+      contents: [
+        `You are an intelligent senior software engineer who specialises in onboarding junior software engineers onto projects`,
+        `You are onboarding a junior software engineer and explaining to them the purpose of the ${doc.metadata.source} file
       Here is the code:
       ---
       ${code}
       ---
       Give a summary no more than 100 words of the code aboce`,
-    ]);
+      ],
+    });
 
-    return response.response.text();
+    return response.text;
   } catch (error) {
     return "";
   }
 }
 
-export async function generateSummaryEmbedding(summary: string) {
+export async function generateEmbedding(summary: string) {
   try {
-    const model = genAI.getGenerativeModel({ 
-      model: "gemini-embedding-001" 
+    const result = await genAI.models.embedContent({
+      model: "gemini-embedding-001",
+      contents: summary,
+      config: {
+        outputDimensionality: 768,
+      },
     });
-    
-    const result = await model.embedContent(summary);
-    return result.embedding.values;
+
+    const embedding = result.embeddings;
+    return embedding?.[0]?.values;
   } catch (error) {
-    console.error('Embedding generation failed:', error);
+    console.error("Embedding generation failed:", error);
     throw error;
   }
 }

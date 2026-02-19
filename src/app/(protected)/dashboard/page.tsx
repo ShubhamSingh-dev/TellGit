@@ -18,6 +18,8 @@ import { FaGithub } from "react-icons/fa";
 import { Button } from "~/components/ui/button";
 import { Textarea } from "~/components/ui/textarea";
 import CommitLog from "./commit-log";
+import AskQuestion from "./ask-question";
+import AskQuestionCard from "./ask-question-card";
 
 export default function DashboardPage() {
   const { project } = useProject();
@@ -80,52 +82,8 @@ export default function DashboardPage() {
         {/* Main Grid */}
         <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
           {/* Ask Code Assistant */}
-          <section className="border-charcoal-800 border p-6 shadow-2xl lg:col-span-2">
-            <div className="mb-6 flex items-center justify-between">
-              <div>
-                <h2 className="text-lg font-bold tracking-tight text-white uppercase italic">
-                  Ask Code Assistant
-                </h2>
-                <p className="text-xs font-bold tracking-wider text-slate-500 uppercase">
-                  Natural language codebase querying
-                </p>
-              </div>
-              <div className="text-brand-primary bg-brand-primary/10 rounded-sm p-2">
-                <Terminal className="size-5" />
-              </div>
-            </div>
-            <div className="group relative">
-              <Textarea
-                className="bg-charcoal-900 border-charcoal-800 focus:border-brand-primary h-40 w-full resize-none rounded-sm border p-5 font-mono text-sm text-white transition-all outline-none placeholder:text-slate-600 focus-visible:ring-0 focus-visible:ring-offset-0"
-                placeholder="> Query: How does the authentication flow work in the account module?"
-              />
-              <div className="absolute right-4 bottom-4 flex space-x-2">
-                <Button
-                  size="icon"
-                  variant="ghost"
-                  className="hover:text-brand-primary text-slate-500 transition-colors hover:bg-transparent"
-                  aria-label="Attach file"
-                >
-                  <Paperclip className="size-5" />
-                </Button>
-              </div>
-            </div>
-            <div className="mt-6 flex items-center justify-between">
-              <div className="flex items-center space-x-2">
-                <div className="flex -space-x-1">
-                  {/* Placeholders for user avatars */}
-                  <div className="border-charcoal-950 h-7 w-7 rounded-sm border bg-slate-700" />
-                  <div className="border-charcoal-950 h-7 w-7 rounded-sm border bg-slate-600" />
-                </div>
-                <span className="text-[10px] font-bold tracking-wider text-slate-500 uppercase">
-                  12 Active Nodes
-                </span>
-              </div>
-              <Button className="bg-brand-primary hover:bg-brand-primary/80 h-auto rounded-sm px-8 py-3 text-xs font-bold tracking-widest text-white uppercase transition-all">
-                Execute Query
-              </Button>
-            </div>
-          </section>
+          {/* <AskQuestion/> */}
+          <AskQuestionCard />
 
           {/* Meeting Context */}
           <section className="border-charcoal-800 flex flex-col items-center justify-between border p-6 text-center">
