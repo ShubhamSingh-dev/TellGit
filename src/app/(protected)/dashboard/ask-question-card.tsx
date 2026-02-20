@@ -32,6 +32,8 @@ const AskQuestionCard = () => {
   const [answer, setAnswer] = useState("");
   const saveAnswer = api.project.saveAnswer.useMutation();
 
+  const utils = api.useUtils();
+
   const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     setAnswer("");
     setFilesReferences([]);
@@ -92,6 +94,9 @@ const AskQuestionCard = () => {
                       {
                         onSuccess: () => {
                           toast.success("Answer saved successfully!");
+                          utils.project.getQuestions.invalidate({
+                            projectId: project!.id,
+                          });
                         },
                         onError: () => {
                           toast.error("Failed to save the answer.");

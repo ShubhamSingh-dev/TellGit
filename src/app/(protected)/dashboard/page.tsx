@@ -4,29 +4,19 @@ import useProject from "~/hooks/use-project";
 import Link from "next/link";
 import {
   ExternalLink,
-  Terminal,
-  Paperclip,
   Presentation,
-  Activity,
-  GitCommit,
-  Brain,
-  Zap,
-  MessageSquare,
-  Bot,
 } from "lucide-react";
 import { FaGithub } from "react-icons/fa";
 import { Button } from "~/components/ui/button";
-import { Textarea } from "~/components/ui/textarea";
 import CommitLog from "./commit-log";
-import AskQuestion from "./ask-question";
 import AskQuestionCard from "./ask-question-card";
+import MeetingCard from "./meeting-card";
 
 export default function DashboardPage() {
   const { project } = useProject();
 
   return (
     <div className="bg-charcoal-950 flex-1 overflow-y-auto p-8">
-      {project?.id}
       {/* Header Section */}
       <div className="mx-auto max-w-6xl space-y-8">
         <div className="bg-brand-primary/10 border-brand-primary/30 flex items-center justify-between rounded-sm border p-4">
@@ -86,32 +76,7 @@ export default function DashboardPage() {
           <AskQuestionCard />
 
           {/* Meeting Context */}
-          <section className="border-charcoal-800 flex flex-col items-center justify-between border p-6 text-center">
-            <div className="space-y-4">
-              <div className="bg-charcoal-900 border-charcoal-800 mx-auto flex h-14 w-14 items-center justify-center rounded-sm border text-slate-500">
-                <Presentation className="size-8" />
-              </div>
-              <div>
-                <h2 className="text-md font-bold tracking-tighter text-white uppercase italic">
-                  Meeting Context
-                </h2>
-                <p className="mt-2 text-[11px] font-medium text-slate-500">
-                  Link conversational outcomes to source files.
-                </p>
-              </div>
-            </div>
-            <div className="mt-6 w-full space-y-3">
-              <Button
-                variant="outline"
-                className="hover:text-charcoal-950 h-auto w-full rounded-sm border-2 border-white py-3 text-[10px] font-bold text-white uppercase transition-all hover:bg-white"
-              >
-                Upload Recording
-              </Button>
-              <p className="text-brand-primary text-[9px] font-bold tracking-[0.2em] uppercase">
-                Enterprise Layer
-              </p>
-            </div>
-          </section>
+          <MeetingCard/>
 
           
             <div className="m-4">
