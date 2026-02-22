@@ -44,3 +44,9 @@ yarn-error.log*
 
 # idea files
 .idea
+
+# Prisma generated client (auto-generated on postinstall via `prisma generate`)
+/generated
+
+# package-lock.json (project uses bun — bun.lock is the source of truth)
+package-lock.json

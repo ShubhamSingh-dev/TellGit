@@ -4,7 +4,7 @@ import React from "react";
 import useProject from "~/hooks/use-project";
 import { api } from "~/trpc/react";
 import MeetingCard from "../dashboard/meeting-card";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import { 
@@ -14,17 +14,39 @@ import {
   MessageSquare, 
   ChevronRight, 
   PlayCircle,
-  Loader2
+  Loader2,
+  Trash2
 } from "lucide-react";
 import { Card, CardContent } from "~/components/ui/card";
 import { Skeleton } from "~/components/ui/skeleton";
 import { format } from "date-fns";
+import { toast } from "sonner";
 
 const MeetingsPage = () => {
+    const router = useRouter();
     const { projectId } = useProject();
+    const utils = api.useUtils();
     const { data: meetings, isLoading } = api.project.getMeetings.useQuery({
         projectId: projectId || "",
-    }, { refetchInterval: 4000 });
+    });
+    const deleteMeeting = api.project.deleteMeeting.useMutation({
+        onSuccess: () => {
+            toast.success("Meeting deleted successfully");
+            void utils.project.getMeetings.invalidate();
+        },
+        onError: () => {
+            toast.error("Failed to delete meeting");
+        },
+    });
+
+    const handleDelete = (e: React.MouseEvent, id: string) => {
+        e.preventDefault();
+        e.stopPropagation();
+        if (window.confirm("Are you sure you want to delete this meeting?")) {
+            deleteMeeting.mutate({ meetingId: id });
+        }
+    };
+    
 
     return (
         <div className="bg-charcoal-950 flex-1 overflow-y-auto p-4 sm:p-8">
@@ -84,7 +106,7 @@ const MeetingsPage = () => {
                     ) : (
                         <div className="grid gap-4">
                             {meetings?.map((meeting) => (
-                                <Link key={meeting.id} href={`/meetings/${meeting.id}`} className="group block">
+                                <div key={meeting.id} className="group block cursor-pointer" onClick={() => router.push(`/meetings/${meeting.id}`)}>
                                     <Card className="bg-charcoal-900/40 border-charcoal-800 group-hover:border-brand-primary/50 group-hover:bg-charcoal-900/60 transition-all duration-300 overflow-hidden relative py-0">
                                         {/* Glow effect on hover */}
                                         <div className="absolute  inset-0 bg-brand-primary/5 opacity-0 group-hover:opacity-100 transition-opacity" />
@@ -132,18 +154,30 @@ const MeetingsPage = () => {
                                                     </div>
                                                 </div>
 
-                                                <div className="flex items-center gap-4 self-end sm:self-center">
-                                                    <Link href={`/meetings/${meeting.id}`}>
-                                                    <Button variant="outline" size="sm" className="bg-charcoal-950/50 border-charcoal-800 text-slate-400 group-hover:border-brand-primary group-hover:text-white group-hover:bg-brand-primary/10 transition-all duration-300 rounded-sm text-[9px] uppercase font-black tracking-widest h-8 px-3 gap-1.5 hover:cursor-pointer">
+                                                <div className="flex items-center gap-4 self-end sm:self-center" onClick={(e) => e.stopPropagation()}>
+                                                    <Button variant="outline" size="sm" onClick={() => router.push(`/meetings/${meeting.id}`)} className="bg-charcoal-950/50 border-charcoal-800 text-slate-400 group-hover:border-brand-primary group-hover:text-white group-hover:bg-brand-primary/10 transition-all duration-300 rounded-sm text-[9px] uppercase font-black tracking-widest h-8 px-3 gap-1.5 hover:cursor-pointer">
                                                         Reports
                                                         <ChevronRight className="size-3.5 group-hover:translate-x-1 transition-transform" />
                                                     </Button>
-                                                    </Link>
+                                                    <Button 
+                                                        disabled={deleteMeeting.isPending} 
+                                                        variant="destructive" 
+                                                        size="sm" 
+                                                        onClick={(e) => handleDelete(e, meeting.id)}
+                                                        className="h-8 rounded-sm text-[9px] uppercase font-black tracking-widest px-3 gap-1.5"
+                                                    >
+                                                        {deleteMeeting.isPending ? (
+                                                            <Loader2 className="size-3 animate-spin" />
+                                                        ) : (
+                                                            <Trash2 className="size-3" />
+                                                        )}
+                                                        Delete
+                                                    </Button>
                                                 </div>
                                             </div>
                                         </CardContent>
                                     </Card>
-                                </Link>
+                                </div>
                             ))}
                         </div>
                     )}
