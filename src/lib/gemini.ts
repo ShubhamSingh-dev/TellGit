@@ -1,16 +1,17 @@
 // npx tsx src/lib/gemini.ts
 import { GoogleGenAI } from "@google/genai";
 import "dotenv/config";
-import { Document } from "@langchain/core/documents";
+import { type Document } from "@langchain/core/documents";
 
 const genAI = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY! });
 
 export const aiSummariseCommit = async (diff: string) => {
-  // https://github.com/owner/repo/commit/<commitHash>.diff
-  const response = await genAI.models.generateContent({
-    model: "gemini-2.5-flash",
-    contents: [
-      `Your are an expert programmer, and you are trying to summarize a git file.
+  try {
+    // https://github.com/owner/repo/commit/<commitHash>.diff
+    const response = await genAI.models.generateContent({
+      model: "gemini-2.5-flash",
+      contents: [
+        `Your are an expert programmer, and you are trying to summarize a git file.
         Reminders about the git diff format:
         For every file, there are a few metadata lines, like (for example):
         \`\`\`
@@ -38,10 +39,14 @@ export const aiSummariseCommit = async (diff: string) => {
         The last comment does not include the file names, because there were more than two relevant files in the hypothetical commit.
         Do not include parts of the example in your summary.
         It is given only as an example of appropirate comments.`,
-      `Please summarise the following diff file: \n\n${diff}`,
-    ],
-  });
-  return response.text;
+        `Please summarise the following diff file: \n\n${diff}`,
+      ],
+    });
+    return response.text;
+  } catch (error) {
+    console.error("Failed to summarise commit:", error);
+    return "";
+  }
 };
 
 export async function summariseCode(doc: Document) {
@@ -63,6 +68,10 @@ export async function summariseCode(doc: Document) {
 
     return response.text;
   } catch (error) {
+    console.error(
+      `Failed to summarise code for ${doc.metadata.source}:`,
+      error,
+    );
     return "";
   }
 }

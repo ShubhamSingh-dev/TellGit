@@ -1,17 +1,42 @@
 import { GithubRepoLoader } from "@langchain/community/document_loaders/web/github";
-import { Document } from "@langchain/core/documents";
+import { type Document } from "@langchain/core/documents";
 import { generateEmbedding, summariseCode } from "./gemini";
 import { db } from "~/server/db";
-import { Octokit } from "octokit";
+import { type Octokit } from "octokit";
+import { Octokit as OctokitClient } from "octokit";
 
-const getFileCount: any = async (path: string, octokit: Octokit, githubOwner: string, githubRepo: string, acc: number = 0) => {
+interface GitHubFile {
+  type: "file" | "dir" | "submodule" | "symlink";
+  size: number;
+  name: string;
+  path: string;
+  content?: string;
+  sha: string;
+  url: string;
+  git_url: string | null;
+  html_url: string | null;
+  download_url: string | null;
+  _links: {
+    git: string | null;
+    html: string | null;
+    self: string;
+  };
+}
+
+const getFileCount = async (
+  path: string,
+  octokit: Octokit,
+  githubOwner: string,
+  githubRepo: string,
+  acc = 0,
+): Promise<number> => {
   const { data } = await octokit.rest.repos.getContent({
     owner: githubOwner,
     repo: githubRepo,
     path,
   });
 
-  if (!Array.isArray(data) && (data as any).type === "file") {
+  if (!Array.isArray(data) && (data as unknown as GitHubFile).type === "file") {
     return acc + 1;
   }
 
@@ -29,25 +54,30 @@ const getFileCount: any = async (path: string, octokit: Octokit, githubOwner: st
 
     if (directories.length > 0) {
       const directoryCount = await Promise.all(
-        directories.map((dir) => getFileCount(dir, octokit, githubOwner, githubRepo))
+        directories.map((dir) =>
+          getFileCount(dir, octokit, githubOwner, githubRepo),
+        ),
       );
-      fileCount += directoryCount.reduce((acc: number, count: number) => acc + count, 0);
+      fileCount += directoryCount.reduce(
+        (acc: number, count: number) => acc + count,
+        0,
+      );
     }
     return acc + fileCount;
   }
   return acc;
 };
 
-export const checkCredits = async (githubUrl:string,githubToken?:string) => {
-  const octokit = new Octokit({auth: githubToken});
+export const checkCredits = async (githubUrl: string, githubToken?: string) => {
+  const octokit = new OctokitClient({ auth: githubToken });
   const githubOwner = githubUrl.split("/")[3];
   const githubRepo = githubUrl.split("/")[4];
-  
-  if(!githubOwner || !githubRepo) return 0;
 
-  const fileCount = await getFileCount("",octokit,githubOwner,githubRepo,0);
+  if (!githubOwner || !githubRepo) return 0;
+
+  const fileCount = await getFileCount("", octokit, githubOwner, githubRepo, 0);
   return fileCount;
-}
+};
 
 export const loadGithubRepo = async (
   githubUrl: string,
@@ -91,35 +121,44 @@ export const indexGithubRepo = async (
         const sourceCodeEmbedding = await db.sourceCodeEmbedding.create({
           data: {
             summary: embedding.summary!,
-            sourceCode: embedding.sourceCode,
+            sourceCode: embedding.sourceCode as string,
             fileName: embedding.fileName,
             projectId,
           },
         });
-        
-        console.log(`Created record ${sourceCodeEmbedding.id}, updating embedding...`);
+
+        console.log(
+          `Created record ${sourceCodeEmbedding.id}, updating embedding...`,
+        );
 
         // Convert embedding array to PostgreSQL vector format
-        const embeddingString = `[${embedding.embedding?.join(',')}]`;
+        const embeddingString = `[${embedding.embedding?.join(",")}]`;
 
         await db.$executeRaw`
         UPDATE "SourceCodeEmbedding" 
         SET "summaryEmbedding" = ${embeddingString}::vector 
         WHERE "id" = ${sourceCodeEmbedding.id}
       `;
-        
-        console.log(`✓ Successfully stored embedding for ${embedding.fileName}`);
+
+        console.log(
+          `✓ Successfully stored embedding for ${embedding.fileName}`,
+        );
       } catch (error) {
-        console.error(`❌ Failed to store embedding for ${embedding.fileName}:`, error);
+        console.error(
+          `❌ Failed to store embedding for ${embedding.fileName}:`,
+          error,
+        );
         throw error;
       }
     }),
   );
-  
+
   // Log summary of results
-  const successful = results.filter(r => r.status === 'fulfilled').length;
-  const failed = results.filter(r => r.status === 'rejected').length;
-  console.log(`\n📊 Embedding storage complete: ${successful} successful, ${failed} failed\n`);
+  const successful = results.filter((r) => r.status === "fulfilled").length;
+  const failed = results.filter((r) => r.status === "rejected").length;
+  console.log(
+    `\n📊 Embedding storage complete: ${successful} successful, ${failed} failed\n`,
+  );
 };
 
 const generateEmbeddings = async (docs: Document[]) => {
@@ -131,13 +170,13 @@ const generateEmbeddings = async (docs: Document[]) => {
         console.log(`Skipping ${doc.metadata.source} - no summary generated`);
         return null;
       }
-      
+
       const embedding = await generateEmbedding(summary);
       return {
         summary,
         embedding,
         sourceCode: JSON.parse(JSON.stringify(doc.pageContent)),
-        fileName: doc.metadata.source,
+        fileName: (doc.metadata.source as string) ?? "unknown",
       };
     }),
   );
