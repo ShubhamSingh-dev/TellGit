@@ -1,7 +1,7 @@
 import z from "zod";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 import { pollCommits } from "~/lib/github";
-import { indexGithubRepo } from "~/lib/github-loader";
+import { checkCredits, indexGithubRepo } from "~/lib/github-loader";
 
 export const projectRouter = createTRPCRouter({
   createProject: protectedProcedure
@@ -13,6 +13,26 @@ export const projectRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
+      const user = await ctx.db.user.findUnique({
+        where: {
+          id: ctx.session.user.id,
+        },
+        select: {
+          credits: true,
+        },
+      });
+
+      if (!user) {
+        throw new Error("User not found");
+      }
+
+      const currentCredits = user.credits || 0;
+      const fileCount = await checkCredits(input.repoUrl,input.githubToken);
+      
+      if(currentCredits < fileCount){
+        throw new Error("Insufficient credits");
+      }
+
       const project = await ctx.db.project.create({
         data: {
           name: input.name,
@@ -28,6 +48,16 @@ export const projectRouter = createTRPCRouter({
 
       await indexGithubRepo(project.id, input.repoUrl, input.githubToken);
       await pollCommits(project.id);
+
+      await ctx.db.user.update({
+        where: {
+          id: ctx.session.user.id,
+        },
+        data: {
+          credits: {decrement: fileCount}
+        },
+      });
+      
       return project;
     }),
   getProjects: protectedProcedure.query(async ({ ctx }) => {
@@ -193,5 +223,21 @@ export const projectRouter = createTRPCRouter({
           credits: true,
         },
       });
+    }),
+    checkCredits: protectedProcedure.input(z.object({ repoUrl: z.string(),githubToken: z.string().optional() })).mutation(async ({ ctx, input }) => {
+      const fileCount = await checkCredits(input.repoUrl,input.githubToken);
+      const userCredits = await ctx.db.user.findUnique({
+        where: {
+          id: ctx.session.user.id!,
+        },
+        select: {
+          credits: true,
+        },
+      });
+
+      return {
+        fileCount,
+        userCredits : userCredits?.credits || 0,
+      };
     }),
 });

@@ -27,7 +27,9 @@ const MeetingsPage = () => {
     const { projectId } = useProject();
     const utils = api.useUtils();
     const { data: meetings, isLoading } = api.project.getMeetings.useQuery({
-        projectId: projectId || "",
+        projectId: projectId!,
+    }, {
+        enabled: !!projectId
     });
     const deleteMeeting = api.project.deleteMeeting.useMutation({
         onSuccess: () => {

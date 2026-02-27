@@ -18,6 +18,8 @@ const QAPage = () => {
   const { projectId } = useProject();
   const { data: questions } = api.project.getQuestions.useQuery({
     projectId: projectId!,
+  }, {
+    enabled: !!projectId
   });
   const [questionIndex, setQuestionIndex] = useState(0);
   const question = questions?.[questionIndex];

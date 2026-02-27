@@ -6,7 +6,9 @@ import { api } from '~/trpc/react';
 
 const TeamMembers = () => {
     const {projectId} = useProject();
-    const {data: teamMembers} = api.project.getTeamMembers.useQuery({projectId: projectId!});
+    const {data: teamMembers} = api.project.getTeamMembers.useQuery({projectId: projectId!}, {
+      enabled: !!projectId
+    });
   return (
     <div className="flex items-center gap-2">
         {teamMembers?.map(member => (

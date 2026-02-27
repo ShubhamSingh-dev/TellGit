@@ -8,6 +8,8 @@ const CommitLog = () => {
   const { projectId, project } = useProject();
   const { data: commits } = api.project.getCommits.useQuery({
     projectId: projectId!,
+  }, {
+    enabled: !!projectId
   });
 
   // Helper function to format time ago
