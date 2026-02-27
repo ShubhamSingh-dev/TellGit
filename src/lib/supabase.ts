@@ -26,7 +26,7 @@ export async function uploadFile(
       }
     });
 
-    xhr.addEventListener("load", async () => {
+    xhr.addEventListener("load", () => {
       if (xhr.status === 200) {
         // Get the public URL after successful upload
         const { data } = supabase.storage

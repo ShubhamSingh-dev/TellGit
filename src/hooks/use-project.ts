@@ -1,5 +1,5 @@
 import { api } from "~/trpc/react";
-import React, { useEffect } from "react";
+import { useEffect } from "react";
 import { useLocalStorage } from "usehooks-ts";
 
 const useProject = () => {
