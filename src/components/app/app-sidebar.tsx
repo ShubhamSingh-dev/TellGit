@@ -44,7 +44,7 @@ const mainMenu = [
   },
   {
     label: "Billing",
-    href: "/billings",
+    href: "/billing",
     icon: Wallet,
   },
 ];

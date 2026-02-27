@@ -79,6 +79,7 @@
         "recharts": "2.15.4",
         "server-only": "^0.0.1",
         "sonner": "^2.0.7",
+        "stripe": "^20.4.0",
         "superjson": "^2.2.6",
         "tailwind-merge": "^3.4.0",
         "usehooks-ts": "^3.1.1",
@@ -2007,6 +2008,8 @@
     "strip-bom": ["strip-bom@3.0.0", "", {}, ""],
 
     "strip-json-comments": ["strip-json-comments@3.1.1", "", {}, ""],
+
+    "stripe": ["stripe@20.4.0", "", { "peerDependencies": { "@types/node": ">=16" }, "optionalPeers": ["@types/node"] }, "sha512-F/aN1IQ9vHmlyLNi3DkiIbyzQb6gyBG0uYFd/VrEVQSc9BLtlgknPUx0EvzZdBMRLFuRaPFIFd7Mxwtg7Pbwzw=="],
 
     "strtok3": ["strtok3@6.3.0", "", { "dependencies": { "@tokenizer/token": "^0.3.0", "peek-readable": "^4.1.0" } }, "sha512-fZtbhtvI9I48xDSywd/somNqgUHl2L2cstmXCCif0itOf96jeW18MBSyrLuNicYQVkvpOxkZtkzujiTJ9LW5Jw=="],
 

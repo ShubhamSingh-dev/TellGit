@@ -12,8 +12,18 @@ const useProject = () => {
   const project = projects?.find((p) => p.id === projectId) ?? null;
 
   useEffect(() => {
-    if (!projectId && projects?.length && projects.length > 0) {
+    if (!projects) return;
+
+    if (!projectId && projects.length > 0) {
       setProjectId(projects[0]!.id);
+      return;
+    }
+
+    if (projectId) {
+      const isProjectValid = projects.some((p) => p.id === projectId);
+      if (!isProjectValid) {
+        setProjectId(projects.length > 0 ? projects[0]!.id : null);
+      }
     }
   }, [projectId, projects, setProjectId]);
 

@@ -11,6 +11,9 @@ import { Button } from "~/components/ui/button";
 import CommitLog from "./commit-log";
 import AskQuestionCard from "./ask-question-card";
 import MeetingCard from "./meeting-card";
+import ArchiveButton from "./archive-button";
+import InviteButton from "./invite-button";
+import TeamMembers from "./team-members";
 
 export default function DashboardPage() {
   const { project } = useProject();
@@ -45,27 +48,9 @@ export default function DashboardPage() {
           </div>
 
           <div className="flex items-center space-x-2">
-            <Button
-              variant="outline"
-              size="sm"
-              className="bg-charcoal-900 border-charcoal-700 hover:bg-charcoal-800 cursor-pointer rounded-sm border px-3 py-1.5 text-[10px] font-bold text-white uppercase transition-colors"
-            >
-              Members
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              className="bg-charcoal-900 border-charcoal-700 hover:bg-charcoal-800 cursor-pointer rounded-sm border px-3 py-1.5 text-[10px] font-bold text-white uppercase transition-colors"
-            >
-              Invite
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              className="bg-charcoal-900 border-charcoal-700 hover:bg-charcoal-800 cursor-pointer rounded-sm border px-3 py-1.5 text-[10px] font-bold text-white uppercase transition-colors"
-            >
-              Archive
-            </Button>
+            <TeamMembers/>
+            <InviteButton/>
+            <ArchiveButton />
           </div>
         </div>
 
