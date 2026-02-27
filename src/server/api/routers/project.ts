@@ -2,6 +2,7 @@ import z from "zod";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 import { pollCommits } from "~/lib/github";
 import { checkCredits, indexGithubRepo } from "~/lib/github-loader";
+import { type Prisma } from "@prisma/client";
 
 export const projectRouter = createTRPCRouter({
   createProject: protectedProcedure
@@ -27,9 +28,9 @@ export const projectRouter = createTRPCRouter({
       }
 
       const currentCredits = user.credits || 0;
-      const fileCount = await checkCredits(input.repoUrl,input.githubToken);
-      
-      if(currentCredits < fileCount){
+      const fileCount = await checkCredits(input.repoUrl, input.githubToken);
+
+      if (currentCredits < fileCount) {
         throw new Error("Insufficient credits");
       }
 
@@ -54,10 +55,10 @@ export const projectRouter = createTRPCRouter({
           id: ctx.session.user.id,
         },
         data: {
-          credits: {decrement: fileCount}
+          credits: { decrement: fileCount },
         },
       });
-      
+
       return project;
     }),
   getProjects: protectedProcedure.query(async ({ ctx }) => {
@@ -101,10 +102,10 @@ export const projectRouter = createTRPCRouter({
       return await ctx.db.question.create({
         data: {
           answer: input.answer,
-          fileReferences: input.fileReferences,
+          fileReferences: input.fileReferences as Prisma.InputJsonValue,
           projectId: input.projectId,
           question: input.question,
-          userId: ctx.session.user.id!,
+          userId: ctx.session.user.id,
         },
       });
     }),
@@ -127,74 +128,9 @@ export const projectRouter = createTRPCRouter({
         },
       });
     }),
-    uploadMeeting: protectedProcedure
-    .input(
-      z.object({
-        projectId: z.string(),
-        meetingUrl: z.string(),
-        name: z.string(),
-      }),
-    )
+  archiveProject: protectedProcedure
+    .input(z.object({ projectId: z.string() }))
     .mutation(async ({ ctx, input }) => {
-      const meeting = await ctx.db.meeting.create({
-        data: {
-          meetingUrl: input.meetingUrl,
-          projectId: input.projectId,
-          name: input.name,
-          status: "PROCESSING",
-        },
-      });
-      return meeting;
-    }),
-    getMeetings: protectedProcedure
-    .input(
-      z.object({
-        projectId: z.string(),
-      }),
-    )
-    .query(async ({ ctx, input }) => {
-      return await ctx.db.meeting.findMany({
-        where: {
-          projectId: input.projectId,
-        },
-        include: {
-          issues: true,
-        },
-        orderBy: {
-          createdAt: "desc",
-        },
-      });
-    }),
-    deleteMeeting: protectedProcedure
-    .input(
-      z.object({
-        meetingId: z.string(),
-      }),
-    )
-    .mutation(async ({ ctx, input }) => {
-      return await ctx.db.meeting.delete({
-        where: {
-          id: input.meetingId,
-        },
-      });
-    }),
-    getMeetingById: protectedProcedure
-    .input(
-      z.object({
-        meetingId: z.string(),
-      }),
-    )
-    .query(async ({ ctx, input }) => {
-      return await ctx.db.meeting.findUnique({
-        where: {
-          id: input.meetingId,
-        },
-        include: {
-          issues: true,
-        },
-      });
-    }),
-    archiveProject: protectedProcedure.input(z.object({ projectId: z.string() })).mutation(async ({ ctx, input }) => {
       return await ctx.db.project.update({
         where: {
           id: input.projectId,
@@ -204,7 +140,9 @@ export const projectRouter = createTRPCRouter({
         },
       });
     }),
-    getTeamMembers: protectedProcedure.input(z.object({ projectId: z.string() })).query(async ({ ctx, input }) => {
+  getTeamMembers: protectedProcedure
+    .input(z.object({ projectId: z.string() }))
+    .query(async ({ ctx, input }) => {
       return await ctx.db.userToProject.findMany({
         where: {
           projectId: input.projectId,
@@ -214,21 +152,25 @@ export const projectRouter = createTRPCRouter({
         },
       });
     }),
-    getMyCredits: protectedProcedure.query(async ({ ctx }) => {
-      return await ctx.db.user.findUnique({
-        where: {
-          id: ctx.session.user.id,
-        },
-        select: {
-          credits: true,
-        },
-      });
-    }),
-    checkCredits: protectedProcedure.input(z.object({ repoUrl: z.string(),githubToken: z.string().optional() })).mutation(async ({ ctx, input }) => {
-      const fileCount = await checkCredits(input.repoUrl,input.githubToken);
+  getMyCredits: protectedProcedure.query(async ({ ctx }) => {
+    return await ctx.db.user.findUnique({
+      where: {
+        id: ctx.session.user.id,
+      },
+      select: {
+        credits: true,
+      },
+    });
+  }),
+  checkCredits: protectedProcedure
+    .input(
+      z.object({ repoUrl: z.string(), githubToken: z.string().optional() }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const fileCount = await checkCredits(input.repoUrl, input.githubToken);
       const userCredits = await ctx.db.user.findUnique({
         where: {
-          id: ctx.session.user.id!,
+          id: ctx.session.user.id,
         },
         select: {
           credits: true,
@@ -237,7 +179,7 @@ export const projectRouter = createTRPCRouter({
 
       return {
         fileCount,
-        userCredits : userCredits?.credits || 0,
+        userCredits: userCredits?.credits ?? 0,
       };
     }),
 });

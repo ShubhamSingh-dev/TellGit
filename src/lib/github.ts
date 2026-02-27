@@ -15,11 +15,28 @@ type Response = {
   commitDate: string;
 };
 
+interface GithubCommit {
+  sha: string;
+  commit: {
+    message: string;
+    committer: {
+      date: string;
+    };
+    author: {
+      name: string;
+      date: string;
+    };
+  };
+  author: {
+    avatar_url: string;
+  };
+}
+
 export const getCommitHashes = async (
   githubUrl: string,
 ): Promise<Response[]> => {
-  const [owner , repo] = githubUrl.split("/").slice(-2);
-  if(!owner || !repo) {
+  const [owner, repo] = githubUrl.split("/").slice(-2);
+  if (!owner || !repo) {
     throw new Error("Invalid github url");
   }
   const { data } = await octokit.rest.repos.listCommits({
@@ -27,34 +44,39 @@ export const getCommitHashes = async (
     repo,
   });
 
-  const sortedCommits = data.sort((a: any, b: any) => {
-    const dateA = new Date(a.commit.committer.date);
-    const dateB = new Date(b.commit.committer.date);
+  const sortedCommits = data.sort((a: unknown, b: unknown) => {
+    const commitA = a as GithubCommit;
+    const commitB = b as GithubCommit;
+    const dateA = new Date(commitA.commit.committer.date);
+    const dateB = new Date(commitB.commit.committer.date);
     return dateB.getTime() - dateA.getTime();
   });
 
-  return sortedCommits.slice(0, 10).map((commit: any) => {
+  return sortedCommits.slice(0, 10).map((commit: unknown) => {
+    const c = commit as GithubCommit;
     return {
-      commitHash: commit.sha as string,
-      commitMessage: commit.commit.message ?? "",
-      commitAuthorName: commit.commit?.author?.name ?? "",
-      commitAuthorAvatar: commit?.author?.avatar_url ?? "",
-      commitDate: commit.commit?.author?.date ?? "",
+      commitHash: c.sha,
+      commitMessage: c.commit.message ?? "",
+      commitAuthorName: c.commit?.author?.name ?? "",
+      commitAuthorAvatar: c.author?.avatar_url ?? "",
+      commitDate: c.commit?.author?.date ?? "",
     };
   });
 };
 
 export const pollCommits = async (projectId: string) => {
-  const { project, githubUrl } = await fetchProjectGithubUrl(projectId);
+  const { githubUrl } = await fetchProjectGithubUrl(projectId);
   const commitHashes = await getCommitHashes(githubUrl);
   const unprocessedCommits = await filterUnprocessedCommits(
     commitHashes,
     projectId,
   );
 
-  const summaryResponses = await Promise.allSettled(unprocessedCommits.map( commit => {
-    return summariseCommit(githubUrl, commit.commitHash);
-  }))
+  const summaryResponses = await Promise.allSettled(
+    unprocessedCommits.map((commit) => {
+      return summariseCommit(githubUrl, commit.commitHash);
+    }),
+  );
   const summaries = summaryResponses.map((response) => {
     if (response.status === "fulfilled") {
       return response.value;
@@ -64,7 +86,7 @@ export const pollCommits = async (projectId: string) => {
 
   const commits = await db.commit.createMany({
     data: summaries.map((summary, index) => {
-      console.log(`processing commits ${index}`)
+      console.log(`processing commits ${index}`);
       return {
         projectId,
         commitHash: unprocessedCommits[index]!.commitHash,
@@ -74,24 +96,24 @@ export const pollCommits = async (projectId: string) => {
         commitDate: unprocessedCommits[index]!.commitDate,
         summary,
       };
-    })
-  })
+    }),
+  });
 
   return commits;
 };
 
-async function summariseCommit(githubUrl:string , commitHash : string) {
+async function summariseCommit(githubUrl: string, commitHash: string) {
   const diffUrl = `${githubUrl}/commit/${commitHash}.diff`;
   console.log("Fetching diff from:", diffUrl);
 
   //currently only work on public repos
-  const { data } = await axios.get(diffUrl, {
-    headers:{
-      Accept: "application/vnd.github.v3.diff"
-    }
+  const { data } = await axios.get<string>(diffUrl, {
+    headers: {
+      Accept: "application/vnd.github.v3.diff",
+    },
   });
 
-  const summary = await aiSummariseCommit(data) || "No summary generated";
+  const summary = (await aiSummariseCommit(data)) ?? "No summary generated";
   return summary;
 }
 
