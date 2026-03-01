@@ -1,7 +1,6 @@
 "use client";
 
 import React from "react";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { vscDarkPlus } from "react-syntax-highlighter/dist/esm/styles/prism";
 import { cn } from "~/lib/utils";
@@ -12,7 +11,7 @@ type CodeReferencesProps = {
 };
 
 const CodeReferences = ({ fileReferences }: CodeReferencesProps) => {
-  const [tab, setTab] = React.useState(fileReferences[0]?.fileName || "");
+  const [tab, setTab] = React.useState(fileReferences[0]?.fileName ?? "");
 
   if (fileReferences.length === 0) {
     return null;

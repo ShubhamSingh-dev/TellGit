@@ -1,7 +1,6 @@
 "use client";
 
 import MDEditor from "@uiw/react-md-editor";
-import Image from "next/image";
 import React, { useState } from "react";
 import { toast } from "sonner";
 import { Code, Paperclip, SaveIcon, Sparkles, Terminal } from "lucide-react";
@@ -44,7 +43,7 @@ const AskQuestionCard = () => {
     const { output, filesReferences } = await askQuestion(question, project.id);
 
     setOpen(true);
-    setFilesReferences(filesReferences);
+    setFilesReferences(filesReferences as { fileName: string; sourceCode: string; summary: string }[]);
 
     for await (const delta of readStreamableValue(output)) {
       if (delta) {
@@ -86,7 +85,7 @@ const AskQuestionCard = () => {
                   onClick={() => {
                     saveAnswer.mutate(
                       {
-                        projectId: project!.id,
+                        projectId: project?.id ?? "",
                         question,
                         answer,
                         fileReferences: filesReferences,
@@ -94,8 +93,8 @@ const AskQuestionCard = () => {
                       {
                         onSuccess: () => {
                           toast.success("Answer saved successfully!");
-                          utils.project.getQuestions.invalidate({
-                            projectId: project!.id,
+                          void utils.project.getQuestions.invalidate({
+                            projectId: project?.id ?? "",
                           });
                         },
                         onError: () => {

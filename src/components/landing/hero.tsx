@@ -120,10 +120,21 @@ export function Hero() {
             <div className="w-3 h-3 rounded-full bg-green-500/80 shadow-[0_0_10px_rgba(34,197,94,0.5)]"></div>
           </div>
           <div className="space-y-3 font-mono">
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1 }}>
-              <p><span className="text-success font-bold">$</span> tellgit init --repo="org/main-api"</p>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 1 }}
+            >
+              <p>
+                <span className="text-success font-bold">$</span> tellgit init
+                --repo=&quot;org/main-api&quot;
+              </p>
             </motion.div>
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 2 }}>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 2 }}
+            >
               <p className="text-blue-400 flex items-center gap-2">
                 <motion.span
                   animate={{ rotate: 360 }}
@@ -138,8 +149,15 @@ export function Hero() {
                  <GitCommit className="w-4 h-4" /> Embedding commit history...
               </p>
             </motion.div>
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 4 }}>
-              <p className="mt-4"><span className="text-success font-bold">$</span> tellgit ask "Where is the auth middleware defined?"</p>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 4 }}
+            >
+              <p className="mt-4">
+                <span className="text-success font-bold">$</span> tellgit ask
+                &quot;Where is the auth middleware defined?&quot;
+              </p>
             </motion.div>
             <motion.div
               initial={{ opacity: 0, height: 0 }}
@@ -147,9 +165,17 @@ export function Hero() {
               transition={{ delay: 5, duration: 0.5 }}
               className="overflow-hidden"
             >
-              <div className="text-foreground border-l-2 border-primary pl-4 mt-3 py-2 bg-primary/5 rounded-r">
-                The auth middleware is defined in <span className="text-primary font-bold">src/middleware/auth.ts</span>.<br/> 
-                It was recently updated in commit <code className="bg-muted px-1.5 py-0.5 rounded text-muted-foreground">a7f2d9</code> to support JWT revocation.
+              <div className="bg-primary/5 border-l-2 border-primary mt-3 py-2 pl-4 text-foreground rounded-r">
+                The auth middleware is defined in{" "}
+                <span className="text-primary font-bold">
+                  src/middleware/auth.ts
+                </span>
+                .<br />
+                It was recently updated in commit{" "}
+                <code className="bg-muted text-muted-foreground rounded px-1.5 py-0.5">
+                  a7f2d9
+                </code>{" "}
+                to support JWT revocation.
               </div>
             </motion.div>
           </div>

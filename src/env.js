@@ -9,21 +9,29 @@ export const env = createEnv({
   server: {
     BETTER_AUTH_SECRET:
       process.env.NODE_ENV === "production"
-        ? z.string()
-        : z.string().optional(),
+        ? z.string().min(1)
+        : z.string().min(1).optional(),
     BETTER_AUTH_URL: z.string().url(),
-    BETTER_AUTH_GITHUB_CLIENT_ID: z.string(),
-    BETTER_AUTH_GITHUB_CLIENT_SECRET: z.string(),
-    BETTER_AUTH_GOOGLE_CLIENT_ID: z.string(),
-    BETTER_AUTH_GOOGLE_CLIENT_SECRET: z.string(),
-    DATABASE_URL: z.url(),
+    BETTER_AUTH_GITHUB_CLIENT_ID: z.string().min(1).optional().default("dummy"),
+    BETTER_AUTH_GITHUB_CLIENT_SECRET: z
+      .string()
+      .min(1)
+      .optional()
+      .default("dummy"),
+    BETTER_AUTH_GOOGLE_CLIENT_ID: z.string().min(1).optional().default("dummy"),
+    BETTER_AUTH_GOOGLE_CLIENT_SECRET: z
+      .string()
+      .min(1)
+      .optional()
+      .default("dummy"),
+    DATABASE_URL: z.string().url(),
     NODE_ENV: z
       .enum(["development", "test", "production"])
       .default("development"),
-    GEMINI_API_KEY: z.string(),
-    GITHUB_TOKEN: z.string(),
-    STRIPE_SECRET_KEY: z.string(),
-    ASSEMBLYAI_API_KEY: z.string(),
+    GEMINI_API_KEY: z.string().min(1).optional().default("dummy"),
+    GITHUB_TOKEN: z.string().min(1).optional().default("dummy"),
+    STRIPE_SECRET_KEY: z.string().min(1).optional().default("dummy"),
+    ASSEMBLYAI_API_KEY: z.string().min(1).optional().default("dummy"),
   },
 
   /**

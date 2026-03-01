@@ -1,4 +1,5 @@
-import { ExternalLink, GitCommit } from "lucide-react";
+import { ExternalLink } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import React from "react";
 import useProject from "~/hooks/use-project";
@@ -37,12 +38,13 @@ const CommitLog = () => {
               <div className="p-4 flex gap-4">
                 {/* Left side - Commit icon */}
                 <div className="shrink-0">
-                  <div className="w-10 h-10 rounded-full bg-slate-900 border border-slate-800 flex items-center justify-center text-slate-500">
-                    <img
-                        src={commit.commitAuthorAvatar}
-                        alt={commit.commitAuthorName}
-                        className="rounded-full"
-                      />
+                  <div className="relative flex h-10 w-10 items-center justify-center rounded-full border border-slate-800 bg-slate-900 text-slate-500 overflow-hidden">
+                    <Image
+                      src={commit.commitAuthorAvatar}
+                      alt={commit.commitAuthorName}
+                      fill
+                      className="rounded-full object-cover"
+                    />
                   </div>
                 </div>
 

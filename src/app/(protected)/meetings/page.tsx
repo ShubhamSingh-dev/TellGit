@@ -10,7 +10,6 @@ import { Button } from "~/components/ui/button";
 import { 
   Video, 
   Calendar, 
-  Clock, 
   MessageSquare, 
   ChevronRight, 
   PlayCircle,
@@ -26,15 +25,15 @@ const MeetingsPage = () => {
     const router = useRouter();
     const { projectId } = useProject();
     const utils = api.useUtils();
-    const { data: meetings, isLoading } = api.project.getMeetings.useQuery({
-        projectId: projectId!,
+    const { data: meetings, isLoading } = api.meeting.getMeetings.useQuery({
+        projectId: projectId ?? "",
     }, {
         enabled: !!projectId
     });
-    const deleteMeeting = api.project.deleteMeeting.useMutation({
+    const deleteMeeting = api.meeting.deleteMeeting.useMutation({
         onSuccess: () => {
             toast.success("Meeting deleted successfully");
-            void utils.project.getMeetings.invalidate();
+            void utils.meeting.getMeetings.invalidate();
         },
         onError: () => {
             toast.error("Failed to delete meeting");
@@ -45,7 +44,7 @@ const MeetingsPage = () => {
         e.preventDefault();
         e.stopPropagation();
         if (window.confirm("Are you sure you want to delete this meeting?")) {
-            deleteMeeting.mutate({ meetingId: id });
+            void deleteMeeting.mutate({ meetingId: id });
         }
     };
     
@@ -70,9 +69,9 @@ const MeetingsPage = () => {
                                 Conversational analysis and AI-extracted insights
                             </p>
                         </div>
-                        {meetings && meetings.length > 0 && (
+                        {(meetings?.length ?? 0) > 0 && (
                             <Badge variant="outline" className="border-charcoal-800 bg-charcoal-900/50 text-slate-400 font-mono text-[10px] uppercase px-3 py-1">
-                                {meetings.length} Recorded Sessions
+                                {meetings?.length} Recorded Sessions
                             </Badge>
                         )}
                     </div>

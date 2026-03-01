@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Presentation, Upload, FileAudio, CheckCircle2, Loader2 } from "lucide-react";
+import { Presentation, Upload, FileAudio, Loader2 } from "lucide-react";
 import { Button } from "~/components/ui/button";
 import { useDropzone } from "react-dropzone";
 import { uploadFile } from "~/lib/supabase";
@@ -25,19 +25,19 @@ const MeetingCard = () => {
       meetingId: string;
       projectId: string;
     }) => {
-      const response = await axios.post("/api/process-meeting", data);
+      const response = await axios.post<{ success: boolean }>("/api/process-meeting", data);
       return response.data;
     },
     onSuccess: () => {
-        void utils.project.getMeetings.invalidate();
-    }
+      void utils.meeting.getMeetings.invalidate();
+    },
   });
 
 
   const router = useRouter();
   const [isUploading, setIsUploading] = useState(false);
   const [progress, setProgress] = useState(0);
-  const uploadMeeting = api.project.uploadMeeting.useMutation();
+  const uploadMeeting = api.meeting.uploadMeeting.useMutation();
 
   const { getRootProps, getInputProps, isDragActive, open } = useDropzone({
     accept: {
@@ -55,20 +55,22 @@ const MeetingCard = () => {
       setProgress(0);
       try {
         const downloadUrl = await uploadFile(file as File, setProgress);
-        uploadMeeting.mutate({
-          projectId: project?.id || "",
-          meetingUrl: downloadUrl,
-          name: file.name,
-        },{
-          onSuccess: (meeting) => {
-            toast.success("Meeting recording uploaded successfully!");
-            router.push("/meetings")
-            processMeeting.mutate({
-              meetingUrl: downloadUrl,
-              meetingId: meeting.id,
-              projectId: project.id,
-            });
+        uploadMeeting.mutate(
+          {
+            projectId: project?.id ?? "",
+            meetingUrl: downloadUrl,
+            name: file.name,
           },
+          {
+            onSuccess: (meeting) => {
+              toast.success("Meeting recording uploaded successfully!");
+              router.push("/meetings");
+              processMeeting.mutate({
+                meetingUrl: downloadUrl,
+                meetingId: (meeting as { id: string }).id,
+                projectId: project?.id ?? "",
+              });
+            },
           onError: () => {
             toast.error("Failed to upload recording.");
           }
