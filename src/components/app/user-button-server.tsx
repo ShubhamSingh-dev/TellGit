@@ -8,9 +8,9 @@ export const UserButtonServer = async () => {
     return <UserButton user={null} />;
   }
 
-  const nameParts = session.user.name?.split(" ") || ["", ""];
-  const firstName = nameParts[0] || "";
-  const lastName = nameParts.slice(1).join(" ") || "";
+  const nameParts = session.user.name?.split(" ") ?? ["", ""];
+  const firstName = nameParts[0] ?? "";
+  const lastName = nameParts.slice(1).join(" ") ?? "";
 
   return (
     <UserButton
@@ -19,7 +19,7 @@ export const UserButtonServer = async () => {
         email: session.user.email,
         firstName,
         lastName,
-        image: session.user.image || undefined,
+        image: session.user.image ?? undefined,
       }}
     />
   );

@@ -24,11 +24,15 @@ const itemVariants = {
 
 export function Hero() {
   return (
-    <section className="relative pt-24 pb-32 border-b border-border overflow-hidden" id="hero">
+    <section
+      className="relative pt-24 pb-32 border-b border-border overflow-hidden"
+      id="hero"
+    >
       <div
         className="absolute inset-0 pointer-events-none"
         style={{
-          backgroundImage: "radial-gradient(var(--border) 1px, transparent 1px)",
+          backgroundImage:
+            "radial-gradient(var(--border) 1px, transparent 1px)",
           backgroundSize: "40px 40px",
           opacity: 0.4,
         }}
@@ -40,9 +44,13 @@ export function Hero() {
         animate="visible"
         className="max-w-7xl mx-auto px-6 relative z-10 text-center"
       >
-        <motion.div variants={itemVariants} className="inline-block border border-primary/30 bg-primary/10 px-3 py-1 mb-8 rounded-full">
+        <motion.div
+          variants={itemVariants}
+          className="inline-block border border-primary/30 bg-primary/10 px-3 py-1 mb-8 rounded-full"
+        >
           <span className="font-mono text-primary text-xs flex items-center gap-2">
-            <Sparkles className="w-3 h-3" /> v1.0.4 - Intelligence for Repositories
+            <Sparkles className="w-3 h-3" /> v1.0.4 - Intelligence for
+            Repositories
           </span>
         </motion.div>
 
@@ -62,7 +70,8 @@ export function Hero() {
             }}
             style={{
               backgroundSize: "200% auto",
-              backgroundImage: "linear-gradient(to right, hsl(var(--primary)), #818cf8, hsl(var(--primary)))",
+              backgroundImage:
+                "linear-gradient(to right, hsl(var(--primary)), #818cf8, hsl(var(--primary)))",
               WebkitBackgroundClip: "text",
               WebkitTextFillColor: "transparent",
             }}
@@ -73,15 +82,32 @@ export function Hero() {
           <br className="md:hidden" /> Instantly.
         </motion.h1>
 
-        <motion.p variants={itemVariants} className="max-w-2xl mx-auto text-lg text-muted-foreground mb-12 font-mono leading-relaxed">
-          &gt; Connect your GitHub repository. Ask complex questions. Get precise answers based on your actual source code and commit history.
+        <motion.p
+          variants={itemVariants}
+          className="max-w-2xl mx-auto text-lg text-muted-foreground mb-12 font-mono leading-relaxed"
+        >
+          &gt; Connect your GitHub repository. Ask complex questions. Get
+          precise answers based on your actual source code and commit history.
         </motion.p>
 
-        <motion.div variants={itemVariants} className="flex flex-col sm:flex-row gap-6 justify-center items-center">
+        <motion.div
+          variants={itemVariants}
+          className="flex flex-col sm:flex-row gap-6 justify-center items-center"
+        >
           <Link href="/signin" className="w-full sm:w-auto">
             <motion.div
-              whileHover={{ scale: 1.05, boxShadow: "4px 4px 0px 0px hsl(var(--primary))", x: -2, y: -2 }}
-              whileTap={{ scale: 0.95, boxShadow: "0px 0px 0px 0px hsl(var(--primary))", x: 0, y: 0 }}
+              whileHover={{
+                scale: 1.05,
+                boxShadow: "4px 4px 0px 0px hsl(var(--primary))",
+                x: -2,
+                y: -2,
+              }}
+              whileTap={{
+                scale: 0.95,
+                boxShadow: "0px 0px 0px 0px hsl(var(--primary))",
+                x: 0,
+                y: 0,
+              }}
             >
               <Button
                 size="lg"
@@ -91,10 +117,7 @@ export function Hero() {
               </Button>
             </motion.div>
           </Link>
-          <motion.div
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-          >
+          <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
             <Button
               variant="outline"
               size="lg"
@@ -120,10 +143,21 @@ export function Hero() {
             <div className="w-3 h-3 rounded-full bg-green-500/80 shadow-[0_0_10px_rgba(34,197,94,0.5)]"></div>
           </div>
           <div className="space-y-3 font-mono">
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1 }}>
-              <p><span className="text-success font-bold">$</span> tellgit init --repo="org/main-api"</p>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 1 }}
+            >
+              <p>
+                <span className="text-success font-bold">$</span> tellgit init
+                --repo=&quot;org/main-api&quot;
+              </p>
             </motion.div>
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 2 }}>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 2 }}
+            >
               <p className="text-blue-400 flex items-center gap-2">
                 <motion.span
                   animate={{ rotate: 360 }}
@@ -133,13 +167,24 @@ export function Hero() {
                 Indexing 452 files...
               </p>
             </motion.div>
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 3 }}>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 3 }}
+            >
               <p className="text-yellow-400 flex items-center gap-2">
-                 <GitCommit className="w-4 h-4" /> Embedding commit history...
+                <GitCommit className="w-4 h-4" /> Embedding commit history...
               </p>
             </motion.div>
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 4 }}>
-              <p className="mt-4"><span className="text-success font-bold">$</span> tellgit ask "Where is the auth middleware defined?"</p>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 4 }}
+            >
+              <p className="mt-4">
+                <span className="text-success font-bold">$</span> tellgit ask
+                &quot;Where is the auth middleware defined?&quot;
+              </p>
             </motion.div>
             <motion.div
               initial={{ opacity: 0, height: 0 }}
@@ -148,8 +193,16 @@ export function Hero() {
               className="overflow-hidden"
             >
               <div className="text-foreground border-l-2 border-primary pl-4 mt-3 py-2 bg-primary/5 rounded-r">
-                The auth middleware is defined in <span className="text-primary font-bold">src/middleware/auth.ts</span>.<br/> 
-                It was recently updated in commit <code className="bg-muted px-1.5 py-0.5 rounded text-muted-foreground">a7f2d9</code> to support JWT revocation.
+                The auth middleware is defined in{" "}
+                <span className="text-primary font-bold">
+                  src/middleware/auth.ts
+                </span>
+                .<br />
+                It was recently updated in commit{" "}
+                <code className="bg-muted px-1.5 py-0.5 rounded text-muted-foreground">
+                  a7f2d9
+                </code>{" "}
+                to support JWT revocation.
               </div>
             </motion.div>
           </div>

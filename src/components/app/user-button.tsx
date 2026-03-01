@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import { LogOut, Settings } from "lucide-react";
 import { authClient } from "~/server/better-auth/client";
 import {
@@ -43,7 +42,7 @@ export const UserButton = ({ user }: UserButtonProps) => {
   }
 
   const initials =
-    `${user.firstName?.[0] || ""}${user.lastName?.[0] || ""}`.toUpperCase() ||
+    `${user.firstName?.[0] ?? ""}${user.lastName?.[0] ?? ""}`.toUpperCase() ||
     "U";
 
   return (

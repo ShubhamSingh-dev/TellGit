@@ -32,7 +32,7 @@ export async function POST(req: NextRequest) {
   if (event.type === "checkout.session.completed") {
     const session = event.data.object as Stripe.Checkout.Session;
     const credits = Number(session.metadata?.credits);
-    const userId = session.client_reference_id!; // Using ! assertion as we expect client_reference_id to be present
+    const userId = session.client_reference_id; // Removing ! assertion since it could technically be missing or null
 
     if (!userId || isNaN(credits)) {
       console.error("Missing user id or invalid credits in webhook session");
