@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import React, { useState } from "react";
 import {
   Sheet,
@@ -49,13 +50,18 @@ const QAPage = () => {
           </div>
           <div className="grid grid-cols-1 gap-4">
             {questions?.map((question, index) => (
-              <SheetTrigger key={question.id} onClick={() => setQuestionIndex(index)}>
-                <div className="group relative bg-charcoal-900/50 hover:bg-charcoal-900 border-charcoal-800 flex items-center gap-6 rounded-sm border p-5 transition-all hover:border-brand-primary/50">
+              <SheetTrigger
+                key={question.id}
+                onClick={() => setQuestionIndex(index)}
+              >
+                <div className="group relative flex items-center gap-6 rounded-sm border border-charcoal-800 bg-charcoal-900/50 p-5 transition-all hover:border-brand-primary/50 hover:bg-charcoal-900">
                   <div className="shrink-0">
-                    <img
-                      className="rounded-full border border-charcoal-700 h-12 w-12"
+                    <Image
+                      className="h-12 w-12 rounded-full border border-charcoal-700"
                       src={question.user.image ?? ""}
                       alt={question.user.name ?? "User"}
+                      height={48}
+                      width={48}
                     />
                   </div>
                   <div className="flex-1 min-w-0 text-left">

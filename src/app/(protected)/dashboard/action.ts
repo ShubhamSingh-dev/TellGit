@@ -28,11 +28,11 @@ export async function askQuestion(question: string, projectId: string) {
 
   let context = "";
 
-  for (const doc of result) {
+  for (const doc of result as { fileName: string; sourceCode: string; summary: string }[]) {
     context += `source: ${doc.fileName}\ncode content: ${doc.sourceCode}\n summary of file: ${doc.summary}\n\n`;
   }
 
-  (async () => {
+  void (async () => {
     const { textStream } = streamText({
       model: google("gemini-2.5-flash"),
       prompt: `
@@ -69,5 +69,5 @@ export async function askQuestion(question: string, projectId: string) {
   return {
     output: stream.value,
     filesReferences: result,
-  }
+  };
 }

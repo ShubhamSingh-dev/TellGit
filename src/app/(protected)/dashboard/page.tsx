@@ -2,12 +2,8 @@
 
 import useProject from "~/hooks/use-project";
 import Link from "next/link";
-import {
-  ExternalLink,
-  Presentation,
-} from "lucide-react";
+import { ExternalLink } from "lucide-react";
 import { FaGithub } from "react-icons/fa";
-import { Button } from "~/components/ui/button";
 import CommitLog from "./commit-log";
 import AskQuestionCard from "./ask-question-card";
 import MeetingCard from "./meeting-card";
@@ -36,7 +32,7 @@ export default function DashboardPage() {
                   LINK:
                 </p>
                 <Link
-                  href={project?.repoUrl || ""}
+                  href={project?.repoUrl ?? ""}
                   target="_blank"
                   className="text-brand-primary flex items-center gap-1 text-sm font-bold tracking-wider hover:underline"
                 >

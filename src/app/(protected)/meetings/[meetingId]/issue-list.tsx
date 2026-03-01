@@ -12,7 +12,7 @@ type Props = {
 };
 
 const IssueList = ({ meetingId }: Props) => {
-    const { data: meeting, isLoading } = api.project.getMeetingById.useQuery(
+    const { data: meeting, isLoading } = api.meeting.getMeetingById.useQuery(
         { meetingId },
         { refetchInterval: 4000 }
     );
@@ -55,7 +55,7 @@ const IssueList = ({ meetingId }: Props) => {
 function IssueCard({
     issue,
 }: {
-    issue: NonNullable<RouterOutputs["project"]["getMeetingById"]>["issues"][number];
+    issue: NonNullable<RouterOutputs["meeting"]["getMeetingById"]>["issues"][number];
 }) {
     const [open, setOpen] = useState(false);
 
@@ -81,7 +81,7 @@ function IssueCard({
                                 </span>
                             </div>
                             <p className="text-sm font-medium leading-relaxed text-slate-300">
-                                "{issue.summary}"
+                                &quot;{issue.summary}&quot;
                             </p>
                         </div>
                     </div>
