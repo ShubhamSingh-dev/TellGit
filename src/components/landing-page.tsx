@@ -11,7 +11,7 @@ import { Footer } from "./landing/footer";
 
 export function LandingPage() {
   return (
-    <div className="min-h-screen bg-background text-foreground overflow-x-hidden font-sans selection:bg-primary selection:text-primary-foreground dark">
+    <div className="min-h-screen bg-background text-foreground overflow-x-hidden font-sans selection:bg-primary selection:text-primary-foreground">
       <Navigation />
       <Hero />
       <Features />

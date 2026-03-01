@@ -18,7 +18,7 @@ export function TechStack() {
           {[...Array(3)].map((_, i) => (
             <React.Fragment key={i}>
               {["GITHUB", "GEMINI AI", "ASSEMBLY AI", "POSTGRESQL", "NEXT.JS", "FRAMER MOTION", "TYPESCRIPT"].map((tech) => (
-                <span key={tech + i} className="text-2xl lg:text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-muted-foreground to-muted-foreground/50 italic font-mono px-8">
+                <span key={tech + i} className="text-2xl lg:text-3xl font-black text-transparent bg-clip-text bg-linear-to-r from-muted-foreground to-muted-foreground/50 italic font-mono px-8">
                   {tech}
                 </span>
               ))}

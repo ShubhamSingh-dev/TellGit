@@ -1,12 +1,12 @@
 "use client";
 
 import React from "react";
-import { motion } from "framer-motion";
+import { motion, type Variants } from "motion/react";
 import { ArrowRight, Github, GitCommit, Sparkles } from "lucide-react";
 import Link from "next/link";
 import { Button } from "~/components/ui/button";
 
-const containerVariants = {
+const containerVariants: Variants = {
   hidden: { opacity: 0 },
   visible: {
     opacity: 1,
@@ -17,21 +17,16 @@ const containerVariants = {
   },
 };
 
-const itemVariants = {
+const itemVariants: Variants = {
   hidden: { opacity: 0, y: 20 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" } },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" as const } },
 };
 
 export function Hero() {
   return (
     <section className="relative pt-24 pb-32 border-b border-border overflow-hidden" id="hero">
       <div
-        className="absolute inset-0 pointer-events-none"
-        style={{
-          backgroundImage: "radial-gradient(var(--border) 1px, transparent 1px)",
-          backgroundSize: "40px 40px",
-          opacity: 0.4,
-        }}
+        className="absolute inset-0 pointer-events-none hero-dot-grid"
       />
 
       <motion.div
@@ -60,13 +55,7 @@ export function Hero() {
               repeat: Infinity,
               ease: "linear",
             }}
-            style={{
-              backgroundSize: "200% auto",
-              backgroundImage: "linear-gradient(to right, hsl(var(--primary)), #818cf8, hsl(var(--primary)))",
-              WebkitBackgroundClip: "text",
-              WebkitTextFillColor: "transparent",
-            }}
-            className="px-2"
+            className="px-2 hero-gradient-text"
           >
             Codebase.
           </motion.span>
@@ -112,7 +101,7 @@ export function Hero() {
         transition={{ delay: 0.8, duration: 0.8 }}
         className="max-w-4xl mx-auto mt-24 p-px bg-border relative group"
       >
-        <div className="absolute inset-0 bg-gradient-to-b from-primary/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 blur-xl" />
+        <div className="absolute inset-0 bg-linear-to-b from-primary/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 blur-xl" />
         <div className="bg-card p-6 font-mono text-sm text-muted-foreground border border-border shadow-2xl relative z-10 sharp-corners">
           <div className="flex gap-2 mb-6 border-b border-border pb-4">
             <div className="w-3 h-3 rounded-full bg-red-500/80 shadow-[0_0_10px_rgba(239,68,68,0.5)]"></div>

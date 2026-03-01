@@ -31,7 +31,7 @@ export function Pricing() {
           className="bg-card border border-border p-10 lg:p-14 shadow-2xl relative overflow-hidden group sharp-corners"
         >
           {/* Animated border trim */}
-          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-primary to-transparent opacity-50 group-hover:opacity-100 transition-opacity" />
+          <div className="absolute top-0 left-0 w-full h-1 bg-linear-to-r from-transparent via-primary to-transparent opacity-50 group-hover:opacity-100 transition-opacity" />
 
           <div className="flex flex-col gap-10">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-6 border-b border-border pb-8">
@@ -46,7 +46,7 @@ export function Pricing() {
                   key={price}
                   initial={{ opacity: 0, y: -10 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="text-6xl font-black text-transparent bg-clip-text bg-gradient-to-br from-[#818cf8] to-primary"
+                  className="text-6xl font-black text-transparent bg-clip-text bg-linear-to-br from-[#818cf8] to-primary"
                 >
                   ${price}
                 </motion.span>
@@ -60,7 +60,10 @@ export function Pricing() {
                 <span>10,000 Files</span>
               </div>
               
-              <div className="relative pt-1">
+              <div
+                className="relative pt-1"
+                style={{ "--slider-fill": `${(sliderValue - 500) / 95}%` } as React.CSSProperties}
+              >
                 <input
                   type="range"
                   min="500"
@@ -68,24 +71,10 @@ export function Pricing() {
                   step="500"
                   value={sliderValue}
                   onChange={(e) => setSliderValue(Number(e.target.value))}
-                  className="w-full h-2 bg-muted rounded-none appearance-none cursor-pointer outline-none"
-                  style={{
-                    background: `linear-gradient(to right, hsl(var(--primary)) ${(sliderValue - 500) / 95}%, var(--color-charcoal-800) ${(sliderValue - 500) / 95}%)`,
-                  }}
+                  aria-label="Number of files to index"
+                  title="Number of files to index"
+                  className="pricing-range-slider"
                 />
-                <style>{`
-                  input[type='range']::-webkit-slider-thumb {
-                    -webkit-appearance: none;
-                    appearance: none;
-                    width: 20px;
-                    height: 20px;
-                    background: #fff;
-                    border: 2px solid hsl(var(--primary));
-                    cursor: pointer;
-                    border-radius: 50%;
-                    box-shadow: 0 0 10px rgba(79, 70, 229, 0.5);
-                  }
-                `}</style>
               </div>
               
               <div className="text-center pt-2">
@@ -100,15 +89,17 @@ export function Pricing() {
                 "Priority file re-indexing",
                 "Webhooks & CI/CD integration"
               ].map((feature, i) => (
-                <motion.li
-                  key={i}
-                  initial={{ opacity: 0, x: -10 }}
-                  whileInView={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.1 * i }}
-                  className="flex items-start gap-3"
-                >
-                  <span className="text-primary flex-shrink-0">✓</span> {feature}
-                </motion.li>
+                <li key={i} className="flex items-start gap-3">
+                  <motion.span
+                    initial={{ opacity: 0, x: -10 }}
+                    whileInView={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.1 * i }}
+                    className="contents"
+                  >
+                    <span className="text-primary shrink-0">✓</span>
+                    <span>{feature}</span>
+                  </motion.span>
+                </li>
               ))}
             </ul>
 

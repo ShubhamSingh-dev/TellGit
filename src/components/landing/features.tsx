@@ -49,7 +49,7 @@ export function Features() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: i * 0.1 }}
-              whileHover={{ backgroundColor: "var(--color-charcoal-900)" }}
+              whileHover={{ backgroundColor: "var(--color-muted)" }}
               className="bg-card p-8 group transition-colors cursor-pointer hover:bg-muted/50"
             >
               <div className="mb-6 text-primary drop-shadow-[0_0_15px_rgba(79,70,229,0.3)]">
