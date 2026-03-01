@@ -1,5 +1,4 @@
 import "~/styles/globals.css";
-import { ThemeProvider } from "~/components/theme-provider";
 
 import { type Metadata } from "next";
 import { Inter, JetBrains_Mono } from "next/font/google";
@@ -27,17 +26,13 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" className={`${inter.variable} ${jetbrainsMono.variable}`} suppressHydrationWarning>
+    <html
+      lang="en"
+      className={`dark ${inter.variable} ${jetbrainsMono.variable}`}
+    >
       <body>
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="dark"
-          enableSystem
-          disableTransitionOnChange
-        >
-          <TRPCReactProvider>{children}</TRPCReactProvider>
-          <Toaster richColors />
-        </ThemeProvider>
+        <TRPCReactProvider>{children}</TRPCReactProvider>
+        <Toaster richColors />
       </body>
     </html>
   );

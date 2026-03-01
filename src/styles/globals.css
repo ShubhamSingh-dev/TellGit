@@ -1,8 +1,6 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
-@custom-variant dark (&:is(.dark *));
-
 @theme {
   --font-sans:
     var(--font-sans), ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji",
@@ -59,38 +57,8 @@
 }
 
 :root {
-  --radius: 0.125rem; /* Sharp corners for Dionysus */
-  --background: #ffffff;
-  --foreground: #121212;
-  --card: #ffffff;
-  --card-foreground: #121212;
-  --popover: #ffffff;
-  --popover-foreground: #121212;
-  --primary: #4f46e5;
-  --primary-foreground: #ffffff;
-  --secondary: #f8f9fa;
-  --secondary-foreground: #121212;
-  --muted: #f8f9fa;
-  --muted-foreground: #64748b;
-  --accent: #f1f5f9;
-  --accent-foreground: #121212;
-  --destructive: #dc2626;
-  --border: #e2e8f0;
-  --input: #e2e8f0;
-  --ring: #4f46e5;
   --radius: 0.5rem;
 
-  --sidebar: #fafafa;
-  --sidebar-foreground: #121212;
-  --sidebar-primary: var(--primary);
-  --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #f1f5f9;
-  --sidebar-accent-foreground: #121212;
-  --sidebar-border: #e2e8f0;
-  --sidebar-ring: #4f46e5;
-}
-
-.dark {
   /* Charcoal Background - Pitch black */
   --background: #121212;
   --foreground: #ffffff;

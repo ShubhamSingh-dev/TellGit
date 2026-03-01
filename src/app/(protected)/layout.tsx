@@ -3,7 +3,6 @@
 import React from "react";
 import { SidebarProvider } from "~/components/ui/sidebar";
 import { AppSidebar } from "~/components/app/app-sidebar";
-import { ModeToggle } from "~/components/theme-toggle";
 import { authClient } from "~/server/better-auth/client";
 import { redirect } from "next/navigation";
 import { Loader2 } from "lucide-react";
@@ -34,7 +33,6 @@ const SidebarLayout = ({ children }: Props) => {
         <div className="border-charcoal-800 bg-background flex items-center gap-2 border-b p-4 shadow-sm">
           {/* <SearchBar/> */}
           <div className="ml-auto"></div>
-          <ModeToggle />
           {/* <UserButtonServer />  */}
         </div>
 

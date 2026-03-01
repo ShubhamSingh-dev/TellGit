@@ -53,14 +53,14 @@ export default function DashboardPage() {
         {/* Main Grid */}
         <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
           {/* Ask Code Assistant */}
-          {/* <AskQuestion/> */}
           <AskQuestionCard />
 
           {/* Meeting Context */}
-          <MeetingCard/>
+          <MeetingCard />
 
-          
-            <div className="m-4">
+          {/* Commit Log — full-width row */}
+          <div className="lg:col-span-3">
+            <div className="mb-4">
               <h2 className="text-xl font-bold tracking-wider text-white uppercase italic">
                 Commit Log
               </h2>
@@ -68,12 +68,12 @@ export default function DashboardPage() {
                 Recent repository commits
               </p>
             </div>
-
-            <section className="border-charcoal-800 border p-6 lg:col-span-3">
-            <div className="max-h-96 overflow-y-auto pr-2">
-              <CommitLog />
-            </div>
-          </section>
+            <section className="border-charcoal-800 border p-6">
+              <div className="max-h-96 overflow-y-auto pr-2 custom-scrollbar">
+                <CommitLog />
+              </div>
+            </section>
+          </div>
         </div>
       </div>
     </div>

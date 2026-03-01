@@ -188,12 +188,9 @@ const AskQuestionCard = () => {
             </div>
             <div className="mt-6 flex items-center justify-between">
               <div className="flex items-center space-x-2">
-                <div className="flex -space-x-1">
-                  <div className="border-charcoal-950 h-7 w-7 rounded-sm border bg-slate-700" />
-                  <div className="border-charcoal-950 h-7 w-7 rounded-sm border bg-slate-600" />
-                </div>
-                <span className="text-[10px] font-bold tracking-wider text-slate-500 uppercase">
-                  12 Active Nodes
+                <div className="h-2 w-2 rounded-full bg-brand-primary animate-pulse" />
+                <span className="text-[10px] font-bold tracking-wider text-slate-500 uppercase font-mono">
+                  {project?.name ?? "No project selected"}
                 </span>
               </div>
               <Button
